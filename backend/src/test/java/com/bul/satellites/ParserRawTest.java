@@ -7,9 +7,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.List;
 
-class ParserTest {
+class ParserRawTest {
 
     private static InputStream resourceToInputStream(Resource e) {
         try {
@@ -22,6 +22,12 @@ class ParserTest {
     @Test
     void test() throws IOException {
         Resource[] resources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
-        Arrays.stream(resources).map(ParserTest::resourceToInputStream).peek(e -> new Parser(e).parse()).collect(Collectors.toList());
+        List<List<DurationDataset>> res = Arrays.stream(resources)
+                .map(ParserRawTest::resourceToInputStream)
+                .map(e -> new ParserRaw(e).parse())
+                .map(Parser::new)
+                .map(Parser::parse)
+                .toList();
+        System.out.println(res);
     }
 }

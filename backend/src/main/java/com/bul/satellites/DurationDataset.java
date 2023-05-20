@@ -1,9 +1,11 @@
 package com.bul.satellites;
 
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
 public class DurationDataset {
-    String name;
-//    List<String> schema;
-    List<List<String>> data;
+    SatelliteBasePair satelliteBasePair;
+    List<DurationEntry> entries; // todo fast search
 }

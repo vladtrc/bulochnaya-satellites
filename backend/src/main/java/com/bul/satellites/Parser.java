@@ -1,36 +1,32 @@
-
 package com.bul.satellites;
 
-import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Parser {
-    InputStream file;
+    Map<String, List<List<String>>> data;
 
-    public Parser(InputStream file) {
-        this.file = file;
+    public Parser(Map<String, List<List<String>>> data) {
+        this.data = data;
     }
 
-    Map<String, List<List<String>>> parse() {
-        Scanner scanner = new Scanner(file);
-        String currDatasetName = null;
-        Map<String, List<List<String>>> data = new HashMap<>();
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (!line.contains(" ") && !line.contains("---") && !line.isEmpty()) {
-                currDatasetName = line;
-                data.put(currDatasetName, new ArrayList<>());
-                continue;
-            }
-            String[] values = line.split("  +");
-            if (values.length == 5 && values[1].chars().allMatch(Character::isDigit) && values[0].isEmpty()) {
-                List<List<String>> lists = data.get(currDatasetName);
-                lists.add(Arrays.stream(values).skip(1).toList());
-                data.put(currDatasetName, lists);
-            }
-        }
-        return data;
+    DurationEntry parseToDurationEntry(List<String> row) {
+        return DurationEntry.builder().start(row.get(1)).end(row.get(2)).build();
+    }
+
+
+    List<DurationDataset> parse() {
+        return data.entrySet().stream().map(nameToDataset -> {
+                    String[] splitName = nameToDataset.getKey().split("-");
+                    String base = splitName[0];
+                    String satellite = splitName[2];
+                    SatelliteBasePair satelliteBasePair = SatelliteBasePair.builder().base(base).satellite(satellite).build();
+                    List<DurationEntry> entries = nameToDataset.getValue().stream().map(this::parseToDurationEntry).collect(Collectors.toList());
+                    return DurationDataset.builder().satelliteBasePair(satelliteBasePair).entries(entries).build();
+                }
+        ).collect(Collectors.toList());
     }
 
     private List<String> parseDatasetLine(String line) {
