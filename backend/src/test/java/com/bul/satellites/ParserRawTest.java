@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 class ParserRawTest {
 
@@ -19,15 +21,31 @@ class ParserRawTest {
         }
     }
 
+    List<DurationDataset> parseFromRaw(InputStream in) {
+        Map<String, List<List<String>>> rawData = new ParserRaw(in).parse();
+        return new Parser(rawData).parse();
+    }
+
     @Test
     void test() throws IOException {
-        Resource[] resources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
-        List<List<DurationDataset>> res = Arrays.stream(resources)
+        Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
+        List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
                 .map(ParserRawTest::resourceToInputStream)
-                .map(e -> new ParserRaw(e).parse())
-                .map(Parser::new)
-                .map(Parser::parse)
+                .map(this::parseFromRaw)
+                .flatMap(List::stream)
                 .toList();
-        System.out.println(res);
+
+
+        Resource[] russiaResources = new PathMatchingResourcePatternResolver().getResources("Russia2Constellation/*.txt");
+        List<DurationDataset> russiaDatasets = Arrays.stream(russiaResources)
+                .map(ParserRawTest::resourceToInputStream)
+                .map(this::parseFromRaw)
+                .flatMap(List::stream)
+                .toList();
+
+        Map<String, List<DurationDataset>> availabilityByBase = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.base));
+        Map<String, List<DurationDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
+        Map<String, List<DurationDataset>> availabilityRussia = russiaDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
+        System.out.println(russiaDatasets);
     }
 }
