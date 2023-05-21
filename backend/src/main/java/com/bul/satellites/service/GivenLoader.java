@@ -1,4 +1,4 @@
-package com.bul.satellites;
+package com.bul.satellites.service;
 
 import com.bul.satellites.mapper.ParserRaw;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;

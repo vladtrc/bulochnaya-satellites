@@ -1,4 +1,4 @@
-package com.bul.satellites;
+package com.bul.satellites.service;
 
 import com.bul.satellites.algo.DumbAlgo;
 import com.bul.satellites.mapper.ResultToResultsWeb;
@@ -15,6 +15,10 @@ import java.util.stream.Stream;
 
 @Component
 public class ResultsContainerWebService {
+    public Map<String, Future<ResultWeb>> getResults() {
+        return results;
+    }
+
     Map<String, Future<ResultWeb>> results = new HashMap<>();
     ExecutorService executorService;
     Given given;
