@@ -1,6 +1,8 @@
 package com.bul.satellites;
 
 import com.bul.satellites.model.DurationDataset;
+import com.bul.satellites.model.DurationInstant;
+import com.bul.satellites.model.DurationInstantDataset;
 import com.bul.satellites.parsing.Parser;
 import com.bul.satellites.parsing.ParserRaw;
 import org.junit.jupiter.api.Test;
@@ -29,26 +31,54 @@ class ParserRawTest {
         return new Parser(rawData).parse();
     }
 
-    @Test
-    void test() throws IOException {
-        Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
-        List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
-                .map(ParserRawTest::resourceToInputStream)
-                .map(this::parseFromRaw)
-                .flatMap(List::stream)
-                .toList();
+    List<DurationInstantDataset> parseFromRaw2(InputStream in) {
+        Map<String, List<List<String>>> rawData = new ParserRaw(in).parse();
+        return new Parser(rawData).parseToDurationInstantDataset();
 
-
-        Resource[] russiaResources = new PathMatchingResourcePatternResolver().getResources("Russia2Constellation/*.txt");
-        List<DurationDataset> russiaDatasets = Arrays.stream(russiaResources)
-                .map(ParserRawTest::resourceToInputStream)
-                .map(this::parseFromRaw)
-                .flatMap(List::stream)
-                .toList();
-
-        Map<String, List<DurationDataset>> availabilityByBase = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.base));
-        Map<String, List<DurationDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
-        Map<String, List<DurationDataset>> availabilityRussia = russiaDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
-        System.out.println(russiaDatasets);
     }
-}
+        @Test
+        void test () throws IOException {
+            Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
+            List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
+                    .map(ParserRawTest::resourceToInputStream)
+                    .map(this::parseFromRaw)
+                    .flatMap(List::stream)
+                    .toList();
+
+
+            Resource[] russiaResources = new PathMatchingResourcePatternResolver().getResources("Russia2Constellation/*.txt");
+            List<DurationDataset> russiaDatasets = Arrays.stream(russiaResources)
+                    .map(ParserRawTest::resourceToInputStream)
+                    .map(this::parseFromRaw)
+                    .flatMap(List::stream)
+                    .toList();
+
+            Map<String, List<DurationDataset>> availabilityByBase = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.base));
+            Map<String, List<DurationDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
+            Map<String, List<DurationDataset>> availabilityRussia = russiaDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
+            System.out.println(russiaDatasets);
+        }
+
+        @Test
+        void test2 () throws IOException {
+            Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
+            List<DurationInstantDataset> facilityDatasets = Arrays.stream(facilityResources)
+                    .map(ParserRawTest::resourceToInputStream)
+                    .map(this::parseFromRaw2)
+                    .flatMap(List::stream)
+                    .toList();
+
+
+            Resource[] russiaResources = new PathMatchingResourcePatternResolver().getResources("Russia2Constellation/*.txt");
+            List<DurationInstantDataset> russiaDatasets = Arrays.stream(russiaResources)
+                    .map(ParserRawTest::resourceToInputStream)
+                    .map(this::parseFromRaw2)
+                    .flatMap(List::stream)
+                    .toList();
+
+            Map<String, List<DurationInstantDataset>> availabilityByBase = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.base));
+            Map<String, List<DurationInstantDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
+            Map<String, List<DurationInstantDataset>> availabilityRussia = russiaDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
+            System.out.println(russiaDatasets);
+        }
+    }

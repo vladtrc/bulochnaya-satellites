@@ -1,9 +1,8 @@
 package com.bul.satellites.parsing;
 
-import com.bul.satellites.model.DurationDataset;
-import com.bul.satellites.model.DurationEntry;
-import com.bul.satellites.model.SatelliteBasePair;
+import com.bul.satellites.model.*;
 
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -102,4 +101,24 @@ public class Parser {
         return day+" "+month+" "+year+" "+hour+":"+minute+":"+second+"."+milli;
     }
 
-}
+
+    DurationInstant parseToDurationInstant(List<String> row) {
+        return DurationInstant.builder().start(toInstant(row.get(1)))
+                .end(toInstant(row.get(2))).build();
+    }
+    public List<DurationInstantDataset> parseToDurationInstantDataset() {
+        return data.entrySet().stream().map(nameToDataset -> {
+                    String[] splitName = nameToDataset.getKey().split("-");
+                    String base = splitName[0];
+                    String satellite = splitName[2];
+                    SatelliteBasePair satelliteBasePair = SatelliteBasePair.builder().base(base).satellite(satellite).build();
+                    List<DurationInstant> entries = nameToDataset.getValue().stream().map(this::parseToDurationInstant).collect(Collectors.toList());
+                    return DurationInstantDataset.builder().satelliteBasePair(satelliteBasePair).entries(entries).build();
+                }
+        ).collect(Collectors.toList());
+    }
+
+
+
+    }
+
