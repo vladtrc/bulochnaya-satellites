@@ -5,7 +5,8 @@ import lombok.Builder;
 import java.time.Instant;
 
 @Builder
-public class DurationEntry {
+public class BaseUsageResult {
+    public String satelliteName;
     public Instant start;
     public Instant end;
 }

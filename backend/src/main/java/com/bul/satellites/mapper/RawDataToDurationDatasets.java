@@ -1,23 +1,24 @@
-package com.bul.satellites.parsing;
+package com.bul.satellites.mapper;
 
 import com.bul.satellites.model.DurationDataset;
 import com.bul.satellites.model.DurationEntry;
 import com.bul.satellites.model.SatelliteBasePair;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Parser {
+public class RawDataToDurationDatasets {
     Map<String, List<List<String>>> data;
 
-    public Parser(Map<String, List<List<String>>> data) {
+    public RawDataToDurationDatasets(Map<String, List<List<String>>> data) {
         this.data = data;
     }
 
     DurationEntry parseToDurationEntry(List<String> row) {
-        return DurationEntry.builder().start(row.get(1)).end(row.get(2)).build();
+        return DurationEntry.builder().start(Instant.parse(row.get(1))).end(Instant.parse(row.get(2))).build();
     }
 
 
