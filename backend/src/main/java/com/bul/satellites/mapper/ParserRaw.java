@@ -1,4 +1,4 @@
-package com.bul.satellites.parsing;
+package com.bul.satellites.mapper;
 
 import java.io.InputStream;
 import java.util.*;
