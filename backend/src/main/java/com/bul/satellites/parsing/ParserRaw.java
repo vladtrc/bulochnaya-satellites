@@ -1,5 +1,4 @@
-
-package com.bul.satellites;
+package com.bul.satellites.parsing;
 
 import java.io.InputStream;
 import java.util.*;
@@ -12,7 +11,7 @@ public class ParserRaw {
         this.file = file;
     }
 
-    Map<String, List<List<String>>> parse() {
+    public Map<String, List<List<String>>> parse() {
         Scanner scanner = new Scanner(file);
         String currDatasetName = null;
         Map<String, List<List<String>>> data = new HashMap<>();

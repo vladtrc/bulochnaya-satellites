@@ -1,5 +1,6 @@
-package com.bul.satellites;
+package com.bul.satellites.algo;
 
+import com.bul.satellites.model.DurationDataset;
 import lombok.Builder;
 import lombok.Data;
 

@@ -1,4 +1,8 @@
-package com.bul.satellites;
+package com.bul.satellites.parsing;
+
+import com.bul.satellites.model.DurationDataset;
+import com.bul.satellites.model.DurationEntry;
+import com.bul.satellites.model.SatelliteBasePair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +21,7 @@ public class Parser {
     }
 
 
-    List<DurationDataset> parse() {
+    public List<DurationDataset> parse() {
         return data.entrySet().stream().map(nameToDataset -> {
                     String[] splitName = nameToDataset.getKey().split("-");
                     String base = splitName[0];

@@ -1,4 +1,4 @@
-package com.bul.satellites;
+package com.bul.satellites.model;
 
 import lombok.Builder;
 

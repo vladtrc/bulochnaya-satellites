@@ -1,4 +1,6 @@
-package com.bul.satellites;
+package com.bul.satellites.algo;
+
+import com.bul.satellites.model.DurationDataset;
 
 public class DumbAlgo implements Algorithm {
     @Override

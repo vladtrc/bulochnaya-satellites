@@ -1,5 +1,8 @@
 package com.bul.satellites;
 
+import com.bul.satellites.model.DurationDataset;
+import com.bul.satellites.parsing.Parser;
+import com.bul.satellites.parsing.ParserRaw;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
