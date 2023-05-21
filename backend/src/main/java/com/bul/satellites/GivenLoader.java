@@ -1,9 +1,9 @@
 package com.bul.satellites;
 
-import com.bul.satellites.model.Given;
-import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.mapper.ParserRaw;
+import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.model.DurationDataset;
+import com.bul.satellites.model.Given;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -18,8 +18,11 @@ import java.util.stream.Collectors;
 @Component
 public class GivenLoader {
     private final Given given;
+    private final RawDataToDurationDatasets rawDataToDurationDatasets;
 
-    public GivenLoader() throws IOException {
+    public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets) throws IOException {
+        this.rawDataToDurationDatasets = rawDataToDurationDatasets;
+
         Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
         List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
                 .map(GivenLoader::resourceToInputStream)
@@ -37,7 +40,6 @@ public class GivenLoader {
         Map<String, List<DurationDataset>> availabilityByBase = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.base));
         Map<String, List<DurationDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
         Map<String, List<DurationDataset>> availabilityRussia = russiaDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
-
         this.given = Given.builder().availabilityByBase(availabilityByBase).availabilityBySatellite(availabilityBySatellite).availabilityRussia(availabilityRussia).build();
     }
 
@@ -55,6 +57,6 @@ public class GivenLoader {
 
     private List<DurationDataset> parseFromRaw(InputStream in) {
         Map<String, List<List<String>>> rawData = new ParserRaw(in).parse();
-        return new RawDataToDurationDatasets(rawData).parse();
+        return rawDataToDurationDatasets.apply(rawData);
     }
 }

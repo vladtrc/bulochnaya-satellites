@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 
 @RestController
 public class Controller {
-    AlgoResultsWeb algoResultsWeb;
+    ResultsContainerWebService algoResultsWeb;
 
     @GetMapping("/results/{name}")
     public ResultWeb results(@PathVariable String name) throws ExecutionException, InterruptedException {

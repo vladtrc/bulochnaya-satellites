@@ -14,12 +14,12 @@ import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 @Component
-public class AlgoResultsWeb {
+public class ResultsContainerWebService {
     Map<String, Future<ResultWeb>> results = new HashMap<>();
     ExecutorService executorService;
     Given given;
 
-    public AlgoResultsWeb(GivenLoader givenLoader, ResultToResultsWeb resultToResultsWeb) {
+    public ResultsContainerWebService(GivenLoader givenLoader, ResultToResultsWeb resultToResultsWeb) {
         this.given = givenLoader.getGiven();
         this.executorService = Executors.newFixedThreadPool(3);
 

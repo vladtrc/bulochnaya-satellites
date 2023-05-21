@@ -1,11 +1,14 @@
 package com.bul.satellites.mapper;
 
+import org.springframework.stereotype.Component;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.function.Function;
 
+@Component
 public class StringToInstant implements Function<String, Instant> {
     @Override
     public Instant apply(String s) {
