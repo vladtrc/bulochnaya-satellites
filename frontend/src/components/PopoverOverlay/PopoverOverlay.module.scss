@@ -1,0 +1,110 @@
+$border-radius: 0.375rem;
+
+:global(.bp4-popover2) {
+  border-radius: $border-radius;
+  box-shadow: none;
+  background-color: #fff;
+
+  :global(.bp4-popover2-content) {
+    border-radius: $border-radius !important;
+    &::after, &::before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 1rem;
+      position: absolute;
+      z-index: -1;
+    }
+    &::before{
+      top: -1rem;
+    }
+  }
+
+  :global(.bp4-popover2-arrow) {
+    position: relative;
+
+    &::before {
+      box-shadow: none !important;
+    }
+
+    & path {
+      fill-opacity: 1 !important;
+    }
+  }
+}
+
+.portal {
+  z-index: 99;
+}
+
+@mixin popoverBorderStyle($borderColor) {
+  border: 1px solid $borderColor;
+
+  & :global(.bp4-popover2-arrow-border) {
+    fill: $borderColor;
+  }
+}
+
+.primary {
+  @include popoverBorderStyle(var(--color-background-primary));
+}
+
+.gray {
+  @include popoverBorderStyle(#969696);
+}
+
+.default {
+  @include popoverBorderStyle(rgb(222, 222, 222));
+}
+
+.confirmed {
+  @include popoverBorderStyle(#d5c9df);
+}
+
+.doned {
+  @include popoverBorderStyle(#d5c9df);
+}
+
+.received {
+  @include popoverBorderStyle(#d5c9df);
+}
+
+.paid {
+  @include popoverBorderStyle(#6fc79b);
+}
+
+.topay {
+  @include popoverBorderStyle(#6fc79b);
+}
+
+.todo {
+  @include popoverBorderStyle(#4fb1eb);
+}
+
+.acceptedMaterial{
+  @include popoverBorderStyle(#6FC79B);
+}
+
+.on_stockMaterial{
+  @include popoverBorderStyle(#9870D0);
+}
+
+.to_paidMaterial{
+  @include popoverBorderStyle(#4FB1EB);
+}
+
+.payedMaterial{
+  @include popoverBorderStyle(#4FB1EB);
+}
+
+.plansMaterial{
+  @include popoverBorderStyle(#BABABA);
+}
+
+.purchasesMaterial{
+  @include popoverBorderStyle(#AF9AD0);
+}
+
+.stocklessMaterial{
+  @include popoverBorderStyle(#9EDDDB);
+}

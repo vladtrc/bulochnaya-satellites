@@ -1,0 +1,21 @@
+.table {
+  width: 100vw;
+  display: grid;
+  grid-template-columns: 20% 80%;
+}
+
+.name {
+  height: var(--row-height);
+  background-color: #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 16px;
+  line-height: var(--row-height);
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.content {
+  overflow-x: scroll;
+}
