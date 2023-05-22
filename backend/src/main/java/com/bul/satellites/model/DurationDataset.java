@@ -7,5 +7,5 @@ import java.util.List;
 @Builder
 public class DurationDataset {
     public SatelliteBasePair satelliteBasePair;
-    public List<DurationEntry> entries; // todo fast search
+    public List<Interval> entries; // todo fast search
 }
