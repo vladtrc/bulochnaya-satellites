@@ -1,4 +1,4 @@
-package com.bul.satellites;
+package com.bul.satellites.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

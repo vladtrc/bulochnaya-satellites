@@ -1,4 +1,4 @@
-package com.bul.satellites;
+package com.bul.satellites.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
