@@ -1,0 +1,17 @@
+.row {
+  position: relative;
+  height: var(--row-height);
+  border-bottom: 1px solid #ddd;
+  display: flex;
+}
+
+.cell {
+  flex-shrink: 0;
+  flex-grow: 0;
+  height: var(--row-height);
+  border-right: 1px dashed #ddd;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
