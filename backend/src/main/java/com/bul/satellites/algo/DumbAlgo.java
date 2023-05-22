@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 @Component
 public class DumbAlgo implements Algorithm {
     //todo @Value does not work
-    @Value("${path}")
-    private String path;
+    //  @Value("${path:/home/badma/Загрузки/}")
+    private String path = "/home/badma/Загрузки/";
 
     @Override
     public Result apply(Given given) {
@@ -31,9 +31,10 @@ public class DumbAlgo implements Algorithm {
 
         return null;
     }
-//todo volume(sec*Gb) is null yet
+
+    //todo volume(sec*Gb) is null yet
     public void processResult(Result result) {
-        toOutput(result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base)));
+        toConsole(result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base)));
     }
 
     @Override
@@ -48,7 +49,7 @@ public class DumbAlgo implements Algorithm {
         map.forEach((k, v) -> {
             try {
                 System.out.println(path + k + ".txt");
-                FileWriter myWriter = new FileWriter("/home/badma/Загрузки/" + k + ".txt");
+                FileWriter myWriter = new FileWriter(path + k + ".txt");
                 myWriter.write("Access * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
                 myWriter.write("\r\n");
                 myWriter.write("\r\n");
@@ -61,7 +62,11 @@ public class DumbAlgo implements Algorithm {
                                 toMillisPart()) + "  " +
                                 p.satelliteBasePair.satellite + "  " + "volume");
                         myWriter.write("\r\n");
-                        System.out.println("Successfully wrote to the file.");
+                        System.out.println("Access" + "  " + ts.fromInstantToString(t.start) + "  " +
+                                ts.fromInstantToString(t.end) + "  " +
+                                (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
+                                toMillisPart()) + "  " +
+                                p.satelliteBasePair.satellite + "  " + "volume");
 
                     } catch (IOException e) {
                         System.out.println("An error occurred.");
@@ -74,6 +79,24 @@ public class DumbAlgo implements Algorithm {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
             }
+        });
+    }
+
+    public void toConsole(Map<String, List<DurationDataset>> map) {
+
+        InstantToString ts = new InstantToString();
+        map.forEach((k, v) -> {
+            System.out.println(path + k + ".txt");
+            System.out.println("Access * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
+
+            v.forEach(p -> p.entries.forEach(t -> {
+
+                System.out.println("Access" + "  " + ts.fromInstantToString(t.start) + "  " +
+                        ts.fromInstantToString(t.end) + "  " +
+                        (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
+                        toMillisPart()) + "  " +
+                        p.satelliteBasePair.satellite + "  " + "volume");
+            }));
         });
     }
 }
