@@ -13,4 +13,7 @@ public class Interval {
     public Duration duration() {
         return Duration.between(start, end);
     }
+
+
+
 }
