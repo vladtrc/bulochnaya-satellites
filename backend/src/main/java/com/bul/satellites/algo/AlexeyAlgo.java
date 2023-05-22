@@ -42,6 +42,7 @@ public class AlexeyAlgo implements Algorithm {
     public Result apply(Given given) {
         Duration step = Duration.ofSeconds(3000);
         Instant end = given.getInterval().end;
+        Duration duration = given.getInterval().duration();
 
         Instant t_current = given.getInterval().start;
         int total_data_lost = 0;
@@ -78,7 +79,7 @@ public class AlexeyAlgo implements Algorithm {
                     s.memory = newAmountOfData;
                 } else { // передающие спутники
                     List<Visibility> cutVisibilities = intervalsCut(visibilities.get(s.name), Interval.builder().start(t_current).end(stepEnd).build());
-                    cutVisibilities.stream().map(v -> intersection(List.of(v.interval), ))
+//                    cutVisibilities.stream().map(v -> intersection(List.of(v.interval), ))
 
                 }
             }
