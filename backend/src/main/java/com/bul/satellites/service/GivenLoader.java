@@ -10,8 +10,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -30,14 +31,14 @@ public class GivenLoader {
 
         Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
         List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
-                .map(GivenLoader::resourceToInputStream)
+                .map(GivenLoader::resourceToInputStreamReader)
                 .map(this::parseFromRaw)
                 .flatMap(List::stream)
                 .toList();
 
         Resource[] russiaResources = new PathMatchingResourcePatternResolver().getResources("Russia2Constellation/*.txt");
         List<DurationDataset> russiaDatasets = Arrays.stream(russiaResources)
-                .map(GivenLoader::resourceToInputStream)
+                .map(GivenLoader::resourceToInputStreamReader)
                 .map(this::parseFromRaw)
                 .flatMap(List::stream)
                 .toList();
@@ -62,15 +63,15 @@ public class GivenLoader {
         return given;
     }
 
-    private static InputStream resourceToInputStream(Resource e) {
+    private static InputStreamReader resourceToInputStreamReader(Resource e) {
         try {
-            return e.getInputStream();
+            return new InputStreamReader(e.getInputStream());
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private List<DurationDataset> parseFromRaw(InputStream in) {
+    private List<DurationDataset> parseFromRaw(InputStreamReader in) {
         Map<String, List<List<String>>> rawData = new ParserRaw(in).parse();
         return rawDataToDurationDatasets.apply(rawData);
     }

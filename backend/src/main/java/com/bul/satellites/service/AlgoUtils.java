@@ -28,6 +28,9 @@ public class AlgoUtils {
         return lhs.isBefore(rhs) ? lhs : rhs;
     }
 
+    public static Duration min(Duration a, Duration b) {
+        return a.compareTo(b) < 0 ? a : b;
+    }
     public static List<Interval> intersection(List<Interval> lhs, List<Interval> rhs) {
         int i = 0;
         int j = 0;

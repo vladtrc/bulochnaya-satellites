@@ -16,7 +16,7 @@ public class Given {
     public Map<String, List<DurationDataset>> availabilityRussia;
 
     // todo add static constrains like bandwidth
-    Interval interval;
+    public Interval interval;
 
 
     public long tx_speed = 250;  // Мегабит/сек отправка на Землю

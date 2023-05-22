@@ -71,7 +71,7 @@ def algo(given: Given) -> Result:
                 # доступно для планирования новых сеансов
                 # поэтому прореживаем области видимости с учетом занятости станций:
                 for v in visibility_cut:
-                    visibility_with_load_elem = intersection([[v.start, v.end]], stations_free(v.base))
+                    visibility_with_load_elem = intersection([[v.start, v.end]], bases_free(v.base))
                     visibility_with_load += [Visibility(x[0], x[1], v.base) for x in visibility_with_load_elem]
 
                 # теперь имеем на руках интервалы - кандидаты для приема данных со спутника.
@@ -88,7 +88,7 @@ def algo(given: Given) -> Result:
                     # далее два варианта. Либо на спутнике достаточно данных, чтобы запланировать сеансы на все интервалы из intervals_busy
                     if max_amount_of_data < s.memory:
                         # исключаем из индивидуального расписания базы время, на которое мы планируем сеансы
-                        stations_free(v.base) = intersection(stations_free(v.base), not_intervals_busy)
+                        bases_free(v.base) = intersection(bases_free(v.base), not_intervals_busy)
                         # исключаем те же самые интервалы из расписания спутника
                         satellites_free(s.name) = intersection(satellites_free(s.name), not_intervals_busy)
                         # добавляем строчки в итоговое расписание сеансов
@@ -100,7 +100,7 @@ def algo(given: Given) -> Result:
                         #обрезаем интервалы так, чтобы на оставшихся интервалах спутник мог передать все свои данные
                         intervals_busy = intervals_cut_by_sum(intervals_busy, s.memory/s.tx_speed)
                         not_intervals_busy = intervals_complement(intervals_busy, 0, T_modeling)
-                        stations_free(v.base) = intersection(stations_free(v.base), not_intervals_busy)
+                        bases_free(v.base) = intersection(bases_free(v.base), not_intervals_busy)
                         satellites_free(s.name) = intersection(satellites_free(s.name), not_intervals_busy)
                         output_schedule += [ScheduleEntry(x[0], x[1], s.name, v.base) for x in intervals_busy]
                         total_data_received += s.memory

@@ -1,22 +1,25 @@
 package com.bul.satellites.mapper;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ParserRaw {
-    InputStream file;
+    InputStreamReader file;
 
-    public ParserRaw(InputStream file) {
+    public ParserRaw(InputStreamReader file) {
         this.file = file;
     }
 
     public Map<String, List<List<String>>> parse() {
-        Scanner scanner = new Scanner(file);
+        BufferedReader scanner = new BufferedReader(file);
         String currDatasetName = null;
+
         Map<String, List<List<String>>> data = new HashMap<>(1000);
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
+        for (String line: scanner.lines().toList()) {
             if (!line.contains(" ") && !line.contains("---") && !line.isEmpty()) {
                 currDatasetName = line;
                 data.put(currDatasetName, new ArrayList<>());
