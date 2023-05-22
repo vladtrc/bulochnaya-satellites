@@ -31,7 +31,7 @@ public class DumbAlgo implements Algorithm {
 
         return null;
     }
-
+//todo volume(sec*Gb) is null yet
     public void processResult(Result result) {
         toOutput(result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base)));
     }
