@@ -18,6 +18,7 @@ public class Interval {
         return Duration.between(start, end);
     }
 
-
-
+    public boolean notEmpty() {
+        return !duration().isZero();
+    }
 }

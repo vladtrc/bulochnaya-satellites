@@ -4,8 +4,6 @@ import com.bul.satellites.algo.AlexeyAlgo;
 import com.bul.satellites.model.Interval;
 import com.google.common.collect.Streams;
 
-
-import java.beans.Visibility;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -44,13 +42,16 @@ public class AlgoUtils {
         List<Interval> res = new ArrayList<>(lhs.size() + rhs.size());
         while ((i < n) && (j < m)) {
             Interval lInterval = lhs.get(i);
-            Interval rInterval = lhs.get(j);
+            Interval rInterval = rhs.get(j);
 
             Instant latestStart = latest(lInterval.start, rInterval.start);
             Instant earliestEnd = earliest(rInterval.end, rInterval.end);
 
             if (latestStart.isBefore(earliestEnd)) {
-                res.add(Interval.builder().start(latestStart).end(earliestEnd).build());
+                Interval interval = new Interval(latestStart, earliestEnd);
+                if (interval.notEmpty()) {
+                    res.add(interval);
+                }
             }
 
             if (lInterval.end.isBefore(rInterval.end)) {
@@ -68,22 +69,15 @@ public class AlgoUtils {
     }
 
     public static List<AlexeyAlgo.Visibility> intervalsCut(List<AlexeyAlgo.Visibility> intervals, Interval limits) {
-        // todo gotta connect w base
         List<AlexeyAlgo.Visibility> ls = new ArrayList<>();
-
-
         intervals.forEach(n -> {
-
             Instant latestStart = latest(n.interval.start, limits.start);
             Instant earliestEnd = earliest(n.interval.end, limits.end);
-
             if (latestStart.isBefore(earliestEnd)) {
-
-                ls.add(new AlexeyAlgo.Visibility(Interval.builder().start(latestStart).end(earliestEnd).build(), n.base));
-                System.out.println("size: "+ls.size());
+                AlexeyAlgo.Visibility visibility = new AlexeyAlgo.Visibility(new Interval(latestStart, earliestEnd), n.base);
+                ls.add(visibility);
             }
         });
-         ls.forEach(System.out::println);
         return ls;
     }
 
@@ -93,12 +87,13 @@ public class AlgoUtils {
         ArrayList<Interval> res = new ArrayList<>();
         for (Interval interval : intervals) {
             sum = sum.plus(interval.duration());
-            if (sum.compareTo(targetSum) <= 0) { // sum <= targetSum
+            if (sum.compareTo(targetSum) <= 0 && interval.notEmpty()) { // sum <= targetSum
                 res.add(interval);
             } else {
                 Instant rightBound = interval.end.minus(sum).plus(targetSum);
                 Interval lastInterval = Interval.builder().start(interval.start).end(rightBound).build();
-                res.add(lastInterval);
+                if (lastInterval.notEmpty())
+                    res.add(lastInterval);
             }
         }
         return res;

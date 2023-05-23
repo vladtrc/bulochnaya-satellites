@@ -47,8 +47,8 @@ public class GivenLoader {
         Map<String, List<DurationDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
         Map<String, List<DurationDataset>> availabilityRussia = russiaDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));
 
-        Instant end = stringToInstant.apply("14 Jun 2027 00:00:00.000");
         Instant start = stringToInstant.apply("1 Jun 2027 00:00:00.000");
+        Instant end = stringToInstant.apply("14 Jun 2027 00:00:00.000");
         Interval interval = Interval.builder().start(start).end(end).build();
 
         this.given = Given.builder()

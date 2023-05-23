@@ -3,7 +3,6 @@ package com.bul.satellites.algo;
 import com.bul.satellites.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.time.Duration;
@@ -34,10 +33,10 @@ public class AlexeyAlgo implements Algorithm {
     }
 
 
-    public List<Visibility> durationDatasetToVisibility(String name, List<DurationDataset> durationDatasets) {
+    public List<Visibility> durationDatasetToVisibility(List<DurationDataset> durationDatasets) {
         return durationDatasets.stream()
                 .collect(Collectors.groupingBy(d -> d.satelliteBasePair.base)).entrySet().stream()
-                .flatMap((kv) -> kv.getValue().stream().flatMap(d -> d.entries.stream().map(interval -> Visibility.builder().base(name).interval(interval).build())))
+                .flatMap((kv) -> kv.getValue().stream().flatMap(d -> d.entries.stream().map(interval -> Visibility.builder().base(d.satelliteBasePair.base).interval(interval).build())))
                 .collect(Collectors.toList());
     }
 
@@ -60,7 +59,7 @@ public class AlexeyAlgo implements Algorithm {
                 .map(name -> SatelliteState.builder().name(name).memory(0).intention("scan").build())
                 .toList();
         Map<String, List<Visibility>> visibilities = given.getAvailabilityBySatellite().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, d -> durationDatasetToVisibility(d.getKey(), d.getValue())));
+                .collect(Collectors.toMap(Map.Entry::getKey, d -> durationDatasetToVisibility(d.getValue())));
 
         Map<SatelliteBasePair, List<Interval>> results = new HashMap<>();
 
@@ -84,7 +83,7 @@ public class AlexeyAlgo implements Algorithm {
                     long gainedData = sumOverIntervals(formerCut).toSeconds() * given.rx_speed;
 
                     long newAmountOfData = Math.min(given.memory_limit, s.memory + gainedData);
-                    totalDataLost = s.memory + gainedData - newAmountOfData;
+                    totalDataLost += s.memory + gainedData - newAmountOfData;
                     s.memory = newAmountOfData;
                 } else { // передающие спутники
                     List<Visibility> cutVisibilities = intervalsCut(visibilities.get(s.name), stepInterval);
@@ -99,7 +98,7 @@ public class AlexeyAlgo implements Algorithm {
 
                         if (maxAmountOfData < s.memory) {
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
-                            satellitesFree.put(v.base, intersection(satellitesFree.get(v.base), notIntervalsBusy));
+                            satellitesFree.put(s.name, intersection(satellitesFree.get(s.name), notIntervalsBusy));
                             appendToResults.accept(s.name, v.base, intervalsBusy);
                             totalDataReceived += maxAmountOfData;
                             s.memory -= maxAmountOfData;
@@ -108,7 +107,7 @@ public class AlexeyAlgo implements Algorithm {
                             notIntervalsBusy = intervalsComplement(intervalsBusy, given.interval);
 
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
-                            satellitesFree.put(v.base, intersection(satellitesFree.get(v.base), notIntervalsBusy));
+                            satellitesFree.put(s.name, intersection(satellitesFree.get(s.name), notIntervalsBusy));
                             appendToResults.accept(s.name, v.base, intervalsBusy);
                             totalDataReceived += s.memory;
                             s.memory = 0;
@@ -137,7 +136,6 @@ public class AlexeyAlgo implements Algorithm {
 
         return new Result(durationDatasets);
     }
-
 
 
     @Override
