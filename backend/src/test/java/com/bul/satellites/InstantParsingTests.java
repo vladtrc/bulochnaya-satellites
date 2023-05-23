@@ -11,7 +11,7 @@ class InstantParsingTests {
     @Test
     void testTimeMapper() {
         StringToInstant stringToInstant = new StringToInstant();
-        Instant instant = stringToInstant.apply("1 Jun 2027 09:19:35.605");
+        Instant instant = stringToInstant.apply("14 Jun 2027 00:00:00.000");
         Assertions.assertEquals("asd", instant);
     }
 }

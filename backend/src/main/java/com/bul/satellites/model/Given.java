@@ -19,9 +19,9 @@ public class Given {
     public Interval interval;
 
 
-    public long tx_speed = 250;  // Мегабит/сек отправка на Землю
-    public long rx_speed = 4000;  // Мегабит/сек фотографирование
-    public long memory_limit = 8000000;  // Мегабит (1 Терабайт)
+    public static long tx_speed = 250;  // Мегабит/сек отправка на Землю
+    public static long rx_speed = 4000;  // Мегабит/сек фотографирование
+    public static long memory_limit = 8000000;  // Мегабит (1 Терабайт)
 
     public static SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy HH:mm:ss.SSS", Locale.US);
 }

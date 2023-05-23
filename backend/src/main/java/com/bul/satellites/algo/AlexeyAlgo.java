@@ -42,16 +42,16 @@ public class AlexeyAlgo implements Algorithm {
     @Override
     public Result apply(Given given) {
         Duration step = Duration.ofSeconds(3000);
-        Instant end = given.getInterval().end;
-        Duration duration = given.getInterval().duration();
+        Instant end = given.interval.end;
+        Duration duration = given.interval.duration();
 
-        Instant t_current = given.getInterval().start;
-        int total_data_lost = 0;
-        int total_data_received = 0;
+        Instant t_current = given.interval.start;
+        long totalDataLost = 0;
+        long totalDataReceived = 0;
 //        int output_schedule = [] .map(e -> Map.entry(e.getKey(), ))
 
-        Map<String, List<Interval>> basesFree = given.availabilityByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.getInterval()))));
-        Map<String, List<Interval>> satellitesFree = given.availabilityBySatellite.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.getInterval()))));
+        Map<String, List<Interval>> basesFree = given.availabilityByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.interval))));
+        Map<String, List<Interval>> satellitesFree = given.availabilityBySatellite.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.interval))));
 
 
         List<SatelliteState> satellites = given.getAvailabilityBySatellite().keySet().stream()
@@ -69,7 +69,7 @@ public class AlexeyAlgo implements Algorithm {
             results.put(satelliteBasePair, intervals);
         };
 
-        while (t_current.isBefore(given.getInterval().end)) {
+        while (t_current.isBefore(given.interval.end)) {
             Instant stepEnd = earliest(t_current.plus(step), end);
             for (SatelliteState s : satellites) {
                 List<Interval> russiaRanges = given.availabilityRussia.get(s.name).stream()
@@ -82,7 +82,7 @@ public class AlexeyAlgo implements Algorithm {
                     long gainedData = sumOverIntervals(formerCut).toSeconds() * given.rx_speed;
 
                     long newAmountOfData = Math.min(given.memory_limit, s.memory + gainedData);
-                    long totalDataLost = s.memory + gainedData - newAmountOfData;
+                    totalDataLost = s.memory + gainedData - newAmountOfData;
                     s.memory = newAmountOfData;
                 } else { // передающие спутники
                     List<Visibility> cutVisibilities = intervalsCut(visibilities.get(s.name), stepInterval);
@@ -99,7 +99,7 @@ public class AlexeyAlgo implements Algorithm {
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
                             satellitesFree.put(v.base, intersection(satellitesFree.get(v.base), notIntervalsBusy));
                             appendToResults.accept(s.name, v.base, intervalsBusy);
-                            total_data_received += maxAmountOfData;
+                            totalDataReceived += maxAmountOfData;
                             s.memory -= maxAmountOfData;
                         } else {
                             intervalsBusy = intervalsCutBySum(intervalsBusy, Duration.ofSeconds(s.memory / given.tx_speed));
@@ -108,7 +108,7 @@ public class AlexeyAlgo implements Algorithm {
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
                             satellitesFree.put(v.base, intersection(satellitesFree.get(v.base), notIntervalsBusy));
                             appendToResults.accept(s.name, v.base, intervalsBusy);
-                            total_data_received += s.memory;
+                            totalDataReceived += s.memory;
                             s.memory = 0;
                             break;
                         }
