@@ -131,6 +131,7 @@ public class AlexeyAlgo implements Algorithm {
             t_current = t_current.plus(min(step, Duration.between(t_current, given.interval.end)));
         }
         List<DurationDataset> durationDatasets = results.entrySet().stream()
+                .filter(d -> !d.getValue().isEmpty())
                 .map(e -> DurationDataset.builder().satelliteBasePair(e.getKey()).entries(e.getValue()).build())
                 .toList();
 
