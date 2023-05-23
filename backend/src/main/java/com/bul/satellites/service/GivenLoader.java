@@ -6,6 +6,7 @@ import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.DurationDataset;
 import com.bul.satellites.model.Given;
 import com.bul.satellites.model.Interval;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -59,6 +60,7 @@ public class GivenLoader {
                 .build();
     }
 
+    @Bean
     public Given getGiven() {
         return given;
     }
