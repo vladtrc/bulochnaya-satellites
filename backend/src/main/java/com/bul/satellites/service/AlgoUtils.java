@@ -4,12 +4,15 @@ import com.bul.satellites.algo.AlexeyAlgo;
 import com.bul.satellites.model.Interval;
 import com.google.common.collect.Streams;
 
+
+import java.beans.Visibility;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 public class AlgoUtils {
     public static List<Interval> intervalsComplement(List<Interval> intervals, Interval limits) {
@@ -31,6 +34,7 @@ public class AlgoUtils {
     public static Duration min(Duration a, Duration b) {
         return a.compareTo(b) < 0 ? a : b;
     }
+
     public static List<Interval> intersection(List<Interval> lhs, List<Interval> rhs) {
         int i = 0;
         int j = 0;
@@ -65,8 +69,24 @@ public class AlgoUtils {
 
     public static List<AlexeyAlgo.Visibility> intervalsCut(List<AlexeyAlgo.Visibility> intervals, Interval limits) {
         // todo gotta connect w base
-        return null;
+        List<AlexeyAlgo.Visibility> ls = new ArrayList<>();
+
+
+        intervals.forEach(n -> {
+
+            Instant latestStart = latest(n.interval.start, limits.start);
+            Instant earliestEnd = earliest(n.interval.end, limits.end);
+
+            if (latestStart.isBefore(earliestEnd)) {
+
+                ls.add(new AlexeyAlgo.Visibility(Interval.builder().start(latestStart).end(earliestEnd).build(), n.base));
+                System.out.println("size: "+ls.size());
+            }
+        });
+         ls.forEach(System.out::println);
+        return ls;
     }
+
 
     public static List<Interval> intervalsCutBySum(List<Interval> intervals, Duration targetSum) {
         Duration sum = Duration.ZERO;

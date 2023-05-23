@@ -1,9 +1,11 @@
 package com.bul.satellites;
 
+import com.bul.satellites.algo.AlexeyAlgo;
 import com.bul.satellites.model.DurationDataset;
 import com.bul.satellites.model.Interval;
 import com.bul.satellites.model.Result;
 import com.bul.satellites.model.SatelliteBasePair;
+import com.bul.satellites.service.AlgoUtils;
 import com.bul.satellites.service.GivenLoader;
 import com.bul.satellites.algo.DumbAlgo;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 
 @SpringBootTest
@@ -35,7 +38,7 @@ class RawDataToDurationDatasetsMapperRawTest {
     }
 
     @Test
-    public void testProcessResult() throws IOException {
+    public void testProcessResult(){
         Result result = Result.builder().build();
         List<Interval> listInt1 = new ArrayList<>();
         Interval int1 = Interval
@@ -102,7 +105,47 @@ class RawDataToDurationDatasetsMapperRawTest {
         DumbAlgo da= new DumbAlgo();
 
         da.processResult(result);
+    }
+    @Test
+    public void testIntervalsCut() {
 
+        Interval intl11 = Interval.builder()
+                .start(Instant.parse("2071-12-10T21:59:58.860Z"))
+                .end(Instant.parse("2073-12-10T21:59:58.860Z"))
+                .build();
+
+        Interval intl22 = Interval.builder()
+                .start(Instant.parse("2073-12-10T21:59:58.860Z"))
+                .end(Instant.parse("2071-12-10T21:59:58.860Z"))
+                .build();
+        Interval intl33 = Interval.builder()
+                .start(Instant.parse("2070-12-10T21:59:58.860Z"))
+                .end(Instant.parse("2070-12-10T21:59:58.860Z"))
+                .build();
+
+        AlexeyAlgo.Visibility av1 = AlexeyAlgo.Visibility.builder()
+                .interval(intl11)
+                .base("Anadyr")
+                .build();
+        AlexeyAlgo.Visibility av2 = AlexeyAlgo.Visibility.builder()
+                .interval(intl22)
+                .base("Magadan")
+                .build();
+        AlexeyAlgo.Visibility av3 = AlexeyAlgo.Visibility.builder()
+                .interval(intl33)
+                .base("Anadyr")
+                .build();
+
+        List<AlexeyAlgo.Visibility> intList1 = new ArrayList<>();
+        intList1.add(av1);
+       intList1.add(av2);
+       intList1.add(av3);
+      //  intList1.forEach(System.out::println);
+        Interval limits=Interval.builder()
+                .start(Instant.parse("2072-12-10T21:59:58.860Z"))
+                .end(Instant.parse("2072-12-10T21:59:58.860Z"))
+                .build();
+        AlgoUtils.intervalsCut(intList1,limits);
 
     }
 }

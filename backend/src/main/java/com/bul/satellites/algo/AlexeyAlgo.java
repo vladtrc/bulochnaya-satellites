@@ -3,6 +3,7 @@ package com.bul.satellites.algo;
 import com.bul.satellites.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.time.Duration;
@@ -24,11 +25,12 @@ public class AlexeyAlgo implements Algorithm {
         String intention; // "scan"/"transmit"
     }
 
+
     @Builder
     @AllArgsConstructor
     public static class Visibility {
-        Interval interval;
-        String base;
+        public Interval interval;
+        public String base;
     }
 
 
@@ -117,7 +119,7 @@ public class AlexeyAlgo implements Algorithm {
                 List<Instant> stateChangingTimes = russiaRanges.stream()
                         .map(e -> e.end.plusSeconds(3000))
                         .toList();
-                for (Instant x: stateChangingTimes) {
+                for (Instant x : stateChangingTimes) {
                     if (t_current.compareTo(x) <= 0 && x.isBefore(t_current.plus(step))) {
                         if (s.intention.equals("scan")) {
                             s.intention = "transmit";
@@ -135,6 +137,8 @@ public class AlexeyAlgo implements Algorithm {
 
         return new Result(durationDatasets);
     }
+
+
 
     @Override
     public String name() {
