@@ -31,7 +31,19 @@ const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
         openType="hover"
         placement="bottom"
         popoverBorderColor="primary"
-        content={<div className={styles.popover}></div>}
+        content={
+          <div className={styles.popover}>
+            <div className={styles.name}>Satellite {satelliteName}</div>
+            <div className={styles.info}>
+              <div className={styles.key}></div>
+              <div className={styles.value}></div>
+            </div>
+            <div className={styles.info}>
+              <div className={styles.key}></div>
+              <div className={styles.value}></div>
+            </div>
+          </div>
+        }
       >
         <div
           style={{
