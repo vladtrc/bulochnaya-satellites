@@ -1,12 +1,14 @@
 package com.bul.satellites;
 
+import com.bul.satellites.algo.AlexeyAlgo;
 import com.bul.satellites.algo.DumbAlgo;
 import com.bul.satellites.mapper.InstantToString;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.mapper.StringToInstant;
-import com.bul.satellites.model.DurationDataset;
-import com.bul.satellites.model.Result;
+import com.bul.satellites.model.*;
 import com.bul.satellites.service.GivenLoader;
+import com.bul.satellites.validators.LimitValidator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +17,12 @@ import org.springframework.context.annotation.ComponentScan;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @SpringBootTest
@@ -111,8 +116,7 @@ class RawDataToDurationDatasetsMapperRawIT {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
             }
-        };
-   // }
+        }
 
     public void toConsole(Map<String, List<DurationDataset>> map) {
 
@@ -141,11 +145,16 @@ class RawDataToDurationDatasetsMapperRawIT {
 
     @Test
     void testGivenLoaderToTxt() throws IOException {
-        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()),new StringToInstant());
-
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         toOneTxt(loader.getGiven().getAvailabilityRussia());
+    }
 
-
+    @Test
+    void testBorders() throws IOException {
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+        Result result = new AlexeyAlgo().apply(loader.getGiven());
+        LimitValidator lm= new LimitValidator(loader.getGiven());
+        lm.validate(result);
     }
 
 }
