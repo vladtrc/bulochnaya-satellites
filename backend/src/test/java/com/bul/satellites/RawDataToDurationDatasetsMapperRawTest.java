@@ -2,6 +2,8 @@ package com.bul.satellites;
 
 import com.bul.satellites.algo.DumbAlgo;
 import com.bul.satellites.mapper.InstantToString;
+import com.bul.satellites.mapper.RawDataToDurationDatasets;
+import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.DurationDataset;
 import com.bul.satellites.model.Result;
 import com.bul.satellites.service.GivenLoader;
@@ -9,10 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,15 +29,14 @@ class RawDataToDurationDatasetsMapperRawTest {
     @Autowired
     GivenLoader loader;
 
-    String path = "";
+    String path = "/home/badma/Загрузки/";
 
     @Test
     void test() throws IOException {
-        // GivenLoader loader = new GivenLoader();
+       //   GivenLoader loader = new GivenLoader();
 
-        //System.out.println(loader.getGiven().getAvailabilityRussia());
+      //  loader.getGiven().getAvailabilityRussia();
 
-        // da.toOutput();
     }
 
     //todo volume(sec*Gb) is null yet
@@ -79,6 +83,39 @@ class RawDataToDurationDatasetsMapperRawTest {
             }
         });
     }
+    public void toOneTxt(Map<String, List<DurationDataset>> map) {
+
+        InstantToString ts = new InstantToString();
+       // map.forEach((k, v) -> {
+            try {
+                //System.out.println("Satellites.txt");
+                FileWriter myWriter = new FileWriter(path+"RussiaCoverage.txt");
+                myWriter.write("Base * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
+                myWriter.write("\r\n");
+                myWriter.write("\r\n");
+
+                map.forEach((k, v) -> v.forEach(p -> p.entries.forEach(t -> {
+                    try {
+                        myWriter.write(k + "  " + ts.fromInstantToString(t.start) + "  " +
+                                ts.fromInstantToString(t.end) + "  " +
+                                (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
+                                toMillisPart()) + "  " +
+                                p.satelliteBasePair.satellite + "  " + "volume");
+                        myWriter.write("\r\n");
+
+                    } catch (IOException e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
+                })));
+                myWriter.close();
+
+            } catch (IOException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }
+        };
+   // }
 
     public void toConsole(Map<String, List<DurationDataset>> map) {
 
@@ -104,4 +141,14 @@ class RawDataToDurationDatasetsMapperRawTest {
         DumbAlgo da = new DumbAlgo();
         processResult(result);
     }
+
+    @Test
+    void testGivenLoaderToTxt() throws IOException {
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()),new StringToInstant());
+
+        toOneTxt(loader.getGiven().getAvailabilityRussia());
+
+
+    }
+
 }
