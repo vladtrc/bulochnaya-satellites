@@ -24,11 +24,9 @@ import java.util.stream.Collectors;
 public class GivenLoader {
     private final Given given;
     private final RawDataToDurationDatasets rawDataToDurationDatasets;
-    private final StringToInstant stringToInstant;
 
-    public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets, StringToInstant stringToInstant) throws IOException {
+    public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets) throws IOException {
         this.rawDataToDurationDatasets = rawDataToDurationDatasets;
-        this.stringToInstant = stringToInstant;
 
         Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
         List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
