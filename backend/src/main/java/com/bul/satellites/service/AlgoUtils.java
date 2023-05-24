@@ -71,7 +71,7 @@ public class AlgoUtils {
             Interval rInterval = rhs.get(j);
 
             Instant latestStart = latest(lInterval.start, rInterval.start);
-            Instant earliestEnd = earliest(rInterval.end, rInterval.end);
+            Instant earliestEnd = earliest(lInterval.end, rInterval.end);
 
             if (latestStart.isBefore(earliestEnd)) {
                 Interval interval = new Interval(latestStart, earliestEnd);
