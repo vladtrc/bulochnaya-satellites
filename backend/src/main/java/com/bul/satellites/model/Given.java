@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class Given {
     public Map<String, List<DurationDataset>> availabilityRussia;
 
     // todo add static constrains like bandwidth
-    public Interval interval;
+    public static Interval interval = new Interval(Instant.parse("2027-06-01T00:00:00Z"), Instant.parse("2027-06-14T00:00:00Z"));
 
 
     public static long tx_speed = 250;  // Мегабит/сек отправка на Землю
