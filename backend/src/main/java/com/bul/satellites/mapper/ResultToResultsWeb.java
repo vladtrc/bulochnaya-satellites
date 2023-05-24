@@ -1,6 +1,7 @@
 package com.bul.satellites.mapper;
 
 import com.bul.satellites.model.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -9,7 +10,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ResultToResultsWeb implements Function<Result, ResultWeb> {
+    final private Given given;
+
     List<BaseUsageResult> toBaseUsageResult(Map.Entry<String, List<DurationDataset>> pair) {
         String satellite = pair.getKey();
         List<DurationDataset> datasets = pair.getValue();
@@ -29,13 +33,12 @@ public class ResultToResultsWeb implements Function<Result, ResultWeb> {
 
     @Override
     public ResultWeb apply(Result result) {
-//        BaseUsageResult
         List<BaseResultWeb> results = result.datasets.stream()
                 .collect(Collectors.groupingBy(e -> e.satelliteBasePair.base))
                 .entrySet()
                 .stream()
                 .map(this::toBaseResultWeb)
                 .collect(Collectors.toList());
-        return ResultWeb.builder().results(results).build();
+        return ResultWeb.builder().results(results).start(given.interval.start).end(given.interval.end).build();
     }
 }
