@@ -72,8 +72,20 @@ export const getIntervalDuration = (
   const end = dayjs(dateEnd);
   const diff = end.diff(start, "milliseconds");
 
-  if (format === DurationMeasuresFormats.date) {
-    return dayjs.duration(diff, "milliseconds").format(format);
+  switch (format) {
+    case DurationMeasuresFormats.date:
+      return dayjs.duration(diff, "milliseconds").format(format);
+
+    case DurationMeasuresFormats.days:
+      return diff / (24 * 60 * 60 * 1000);
+
+    case DurationMeasuresFormats.hours:
+      return diff / (60 * 60 * 1000);
+
+    case DurationMeasuresFormats.minutes:
+      return diff / (60 * 1000);
+
+    case DurationMeasuresFormats.seconds:
+      return diff / 1000;
   }
-  return dayjs(diff * 1000).get(format as any);
 };

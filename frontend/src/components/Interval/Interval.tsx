@@ -39,7 +39,7 @@ const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
         popoverBorderColor="primary"
         content={
           <div className={styles.popover}>
-            <div className={styles.name}>Satellite: {satelliteName}</div>
+            <div className={styles.name}>{satelliteName}</div>
             <div className={styles.info}>
               <div className={styles.key}>Duration:</div>
               <div className={styles.value}>
@@ -51,13 +51,13 @@ const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
             <div className={styles.info}>
               <div className={styles.key}>Start at:</div>
               <div className={styles.value}>
-                {dayjs(startAt).format("YYYY-MM-DD")}
+                {dayjs(startAt).format("YYYY.MM.DD HH:mm")}
               </div>
             </div>
             <div className={styles.info}>
               <div className={styles.key}>End at:</div>
               <div className={styles.value}>
-                {dayjs(endAt).format("YYYY-MM-DD")}
+                {dayjs(endAt).format("YYYY.MM.DD HH:mm")}
               </div>
             </div>
             <div className={styles.info}>
@@ -67,15 +67,16 @@ const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
           </div>
         }
       >
-        <div
-          style={{
-            width: `${width}px`,
-          }}
-          className={styles.inner}
-        >
-          {satelliteName}
-        </div>
+        <div className={styles.infoIcon}>i</div>
       </PopoverOverlay>
+      <div
+        style={{
+          width: `${width}px`,
+        }}
+        className={styles.inner}
+      >
+        {satelliteName}
+      </div>
     </div>
   );
 };

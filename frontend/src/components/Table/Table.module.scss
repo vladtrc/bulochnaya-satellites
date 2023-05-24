@@ -23,12 +23,19 @@
 .settings {
   display: grid;
   width: 100%;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 5fr 5fr 2fr;
   column-gap: 24px;
+  row-gap: 12px;
   padding: 16px;
 }
 
 .label {
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.algoField {
+  display: flex;
+  height: 36px;
 }

@@ -1,15 +1,18 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DurationMeasuresFormats, ScalesEnum } from "../../constants";
 import { tempEnd, tempMock, tempStart } from "../../temp/temp";
 import { getCommonWidth } from "../../utils";
 import StantionRow from "../StantionRow/StantionRow";
 import TableHeader from "../TableHeader/TableHeader";
 import Select from "react-select";
+import useSWR from "swr";
 
 import styles from "./Table.module.scss";
 import { useMeasure } from "../../contexts/MeasureContext";
+import { fetcher } from "../../services/fetcher";
 
 const scaleOptions = [
+  { value: ScalesEnum["12h"], label: "12h" },
   { value: ScalesEnum.day, label: "Day" },
   { value: ScalesEnum.week, label: "Week" },
   { value: ScalesEnum.month, label: "Month" },
@@ -45,8 +48,21 @@ const Table = () => {
     onChangeHourWidth(contentWidth / dimension);
   };
 
+  const algoInput = useRef<HTMLInputElement>(null);
+  const [algoName, setAlgoName] = useState("");
+
+  const submitHandler = () => {
+    setAlgoName(algoInput.current?.value!);
+  };
+
+  const { data } = useSWR(
+    () => (!!algoName ? `/results/${algoName}` : null),
+    fetcher
+  );
+
   return (
     <div>
+      {JSON.stringify(data)}
       <div className={styles.settings}>
         <div>
           <label className={styles.label}>Scale</label>
@@ -69,6 +85,15 @@ const Table = () => {
               onChangeDurationFormat(v?.value!);
             }}
           />
+        </div>
+        <div>
+          <label className={styles.label}>Algorithm</label>
+          <div className={styles.algoField}>
+            <input ref={algoInput} className={styles.input} />
+            <button onClick={submitHandler} className={styles.submit}>
+              Submit
+            </button>
+          </div>
         </div>
       </div>
       <div className={styles.table}>
