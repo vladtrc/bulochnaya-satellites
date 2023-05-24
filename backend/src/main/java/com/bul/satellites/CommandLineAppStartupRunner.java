@@ -21,12 +21,12 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Result result = new AlexeyAlgo().apply(given);
-        ResultWeb resultWeb = resultToResultsWeb.apply(result);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JavaTimeModule module = new JavaTimeModule();
-        objectMapper.registerModule(module);
-        objectMapper.writeValue(new File("car.json"), resultWeb); // слишком много данных там
-        System.out.println();
+//        Result result = new AlexeyAlgo().apply(given);
+//        ResultWeb resultWeb = resultToResultsWeb.apply(result);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JavaTimeModule module = new JavaTimeModule();
+//        objectMapper.registerModule(module);
+//        objectMapper.writeValue(new File("car.json"), resultWeb); // слишком много данных там
+//        System.out.println();
     }
 }

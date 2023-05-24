@@ -1,15 +1,13 @@
 version: "2"
 services:
-#  backend:
-#    container_name: monolith
-#    build:
-#      context: backend
-#      dockerfile: Dockerfile
-#    network_mode: host
-#    volumes:
-#      - ./backend/m2:/root/.m2
-#    depends_on:
-#      - backend-postgres
+  rest-backend:
+    container_name: backend
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    network_mode: host
+    depends_on:
+      - backend-postgres
 
   front:
     build:

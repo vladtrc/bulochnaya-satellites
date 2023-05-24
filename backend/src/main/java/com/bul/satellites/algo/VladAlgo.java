@@ -64,8 +64,9 @@ public class VladAlgo implements Algorithm {
             String base = intervalsByBase.getKey();
             ArrayList<Map.Entry<Interval, List<String>>> intervals = intervalsByBase.getValue();
             Collections.reverse(intervals);
-            Iterator<Map.Entry<Interval, List<String>>> interval = intervals.iterator();
-            while (interval.hasNext()) {
+            Iterator<Map.Entry<Interval, List<String>>> intervalIterator = intervals.iterator();
+            Map.Entry<Interval, List<String>> interval = intervalIterator.next();
+            while (intervalIterator.hasNext()) {
 
             }
         }

@@ -11,13 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,7 +22,7 @@ import java.util.stream.Collectors;
 
 @SpringBootTest
 @ComponentScan("com.bul.satellites.mapper")
-class RawDataToDurationDatasetsMapperRawTest {
+class RawDataToDurationDatasetsMapperRawIT {
     @Autowired
     GivenLoader loader;
 
