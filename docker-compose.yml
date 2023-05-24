@@ -6,8 +6,6 @@ services:
       context: backend
       dockerfile: Dockerfile
     network_mode: host
-    depends_on:
-      - backend-postgres
 
   front:
     build:
