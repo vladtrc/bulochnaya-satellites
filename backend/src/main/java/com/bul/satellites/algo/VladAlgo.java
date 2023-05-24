@@ -28,7 +28,7 @@ public class VladAlgo implements Algorithm {
                                         .collect(Collectors.toList())
                         )
                 );
-        Map<String, ArrayList<Map.Entry<Interval, List<String>>>> intervalsByBase = eventsByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+        Map<String, ArrayList<Map.Entry<Interval, List<String>>>> intervalsByBases = eventsByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 e -> {
                     // get to know which intervals correspond to which satellites
                     List<Instant> borders = e.getValue();
@@ -60,6 +60,15 @@ public class VladAlgo implements Algorithm {
                     }
                     return intervalsJoined;
                 }));
+        for (Map.Entry<String, ArrayList<Map.Entry<Interval, List<String>>>> intervalsByBase : intervalsByBases.entrySet()) {
+            String base = intervalsByBase.getKey();
+            ArrayList<Map.Entry<Interval, List<String>>> intervals = intervalsByBase.getValue();
+            Collections.reverse(intervals);
+            Iterator<Map.Entry<Interval, List<String>>> interval = intervals.iterator();
+            while (interval.hasNext()) {
+
+            }
+        }
         return null;
     }
 
