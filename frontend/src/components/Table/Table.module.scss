@@ -17,5 +17,18 @@
 }
 
 .content {
-  overflow-x: scroll;
+  overflow-x: auto;
+}
+
+.settings {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  padding: 16px;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 8px;
 }

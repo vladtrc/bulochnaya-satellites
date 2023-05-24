@@ -1,5 +1,9 @@
+import dayjs from "dayjs";
 import React from "react";
+import { DurationLabels } from "../../constants";
+import { useMeasure } from "../../contexts/MeasureContext";
 import {
+  getIntervalDuration,
   getIntervalOffset,
   getIntervalWidth,
   stringToColour,
@@ -15,8 +19,10 @@ interface IProps {
 }
 
 const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
-  const startPosition = getIntervalOffset(startAt);
-  const width = getIntervalWidth(startAt, endAt);
+  const { hourWidth, durationFormat } = useMeasure();
+
+  const startPosition = getIntervalOffset(startAt, hourWidth);
+  const width = getIntervalWidth(startAt, endAt, hourWidth);
 
   return (
     <div
@@ -33,10 +39,26 @@ const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
         popoverBorderColor="primary"
         content={
           <div className={styles.popover}>
-            <div className={styles.name}>Satellite {satelliteName}</div>
+            <div className={styles.name}>Satellite: {satelliteName}</div>
             <div className={styles.info}>
-              <div className={styles.key}></div>
-              <div className={styles.value}></div>
+              <div className={styles.key}>Duration:</div>
+              <div className={styles.value}>
+                {getIntervalDuration(startAt, endAt, durationFormat)}
+                &nbsp;
+                {DurationLabels[durationFormat]}
+              </div>
+            </div>
+            <div className={styles.info}>
+              <div className={styles.key}>Start at:</div>
+              <div className={styles.value}>
+                {dayjs(startAt).format("YYYY-MM-DD")}
+              </div>
+            </div>
+            <div className={styles.info}>
+              <div className={styles.key}>End at:</div>
+              <div className={styles.value}>
+                {dayjs(endAt).format("YYYY-MM-DD")}
+              </div>
             </div>
             <div className={styles.info}>
               <div className={styles.key}></div>

@@ -1,17 +1,29 @@
 import { tempStart } from "./temp/temp";
 import dayjs from "dayjs";
-import { HOUR_WIDTH } from "./constants";
 
-export const getIntervalOffset = (startAt: string) => {
-  return dayjs(startAt).diff(tempStart, "hours") * HOUR_WIDTH;
+import duration from "dayjs/plugin/duration";
+import { DurationMeasuresFormats } from "./constants";
+
+dayjs.extend(duration);
+
+export const getIntervalOffset = (startAt: string, hourWidth: number) => {
+  return dayjs(startAt).diff(tempStart, "hours") * hourWidth;
 };
 
-export const getIntervalWidth = (startAt: string, endAt: string) => {
-  return dayjs(endAt).diff(startAt, "hours") * HOUR_WIDTH;
+export const getIntervalWidth = (
+  startAt: string,
+  endAt: string,
+  hourWidth: number
+) => {
+  return dayjs(endAt).diff(startAt, "hours") * hourWidth;
 };
 
-export const getCommonWidth = (startAt: string, endAt: string) => {
-  return dayjs(endAt).diff(startAt, "hours") * HOUR_WIDTH;
+export const getCommonWidth = (
+  startAt: string,
+  endAt: string,
+  hourWidth: number
+) => {
+  return dayjs(endAt).diff(startAt, "hours") * hourWidth;
 };
 
 export const getDaysForHeader = (startAt: string, endAt: string) => {
@@ -32,7 +44,10 @@ export const getDaysForHeader = (startAt: string, endAt: string) => {
     dateCursor = dayjs(dateCursor).add(1, "hours");
   }
 
-  return Object.entries(datesDict).map(([date, hours]) => ({ date, hours }));
+  return Object.entries(datesDict).map(([date, hours]) => ({
+    date: dayjs(date).format("DD.MM"),
+    hours,
+  }));
 };
 
 export const stringToColour = function (str: string) {
@@ -46,4 +61,19 @@ export const stringToColour = function (str: string) {
     colour += ("00" + value.toString(16)).substr(-2);
   }
   return colour;
+};
+
+export const getIntervalDuration = (
+  dateStart: string,
+  dateEnd: string,
+  format: string
+) => {
+  const start = dayjs(dateStart);
+  const end = dayjs(dateEnd);
+  const diff = end.diff(start, "milliseconds");
+
+  if (format === DurationMeasuresFormats.date) {
+    return dayjs.duration(diff, "milliseconds").format(format);
+  }
+  return dayjs(diff * 1000).get(format as any);
 };

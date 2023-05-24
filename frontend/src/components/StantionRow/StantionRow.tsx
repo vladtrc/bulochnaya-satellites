@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { HOUR_WIDTH } from "../../constants";
+import { useMeasure } from "../../contexts/MeasureContext";
 import { tempEnd, tempMock, tempStart } from "../../temp/temp";
 import { getDaysForHeader } from "../../utils";
 import Interval from "../Interval/Interval";
@@ -11,6 +11,8 @@ interface IProps {
 }
 
 const StantionRow: React.FC<IProps> = ({ stantionData }) => {
+  const { hourWidth } = useMeasure();
+
   const daysArr = useMemo(() => {
     return getDaysForHeader(tempStart, tempEnd);
   }, []);
@@ -21,7 +23,7 @@ const StantionRow: React.FC<IProps> = ({ stantionData }) => {
         <div
           key={el.date}
           className={styles.cell}
-          style={{ width: `${el.hours * HOUR_WIDTH}px` }}
+          style={{ width: `${el.hours * hourWidth}px` }}
         ></div>
       ))}
       {stantionData.usage.map((el, i) => (
