@@ -21,6 +21,32 @@ public class AlgoUtils {
                 .collect(Collectors.toList());
     }
 
+//    private static int binarySearch(List<Interval> intervals, Instant timestamp) {
+//        int low = 0;
+//        int high = intervals.size() - 1;
+//
+//        while (low <= high) {
+//            int middleIndex = (low + high) / 2;
+//            Instant middleIndexNumber = intervals.get(middleIndex).start;
+//
+//            if (number_to_search_for == middleIndexNumber) {
+//                return middleIndex;
+//            }
+//            if (number_to_search_for < middleIndexNumber) {
+//                high = middleIndex - 1;
+//            }
+//            if (number_to_search_for > middleIndexNumber) {
+//                low = middleIndex + 1;
+//            }
+//        }
+//
+//        return -1;
+//    }
+
+    public static boolean intervalsContain(List<Interval> intervals, Interval target) {
+        return intervals.stream().anyMatch(i -> i.start.compareTo(target.start) <= 0 && i.end.compareTo(target.end) <= 0);
+    }
+
     public static Instant latest(Instant lhs, Instant rhs) {
         return lhs.isAfter(rhs) ? lhs : rhs;
     }
