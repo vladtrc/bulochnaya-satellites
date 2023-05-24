@@ -220,9 +220,7 @@ class RawDataToDurationDatasetsMapperRawIT {
                 .end(Instant.parse("2072-12-10T20:59:59.860Z"))
                 .build();
 
-        Given g=Given.builder()
-                .interval(intGiven)
-                .
+
 
     }
 
