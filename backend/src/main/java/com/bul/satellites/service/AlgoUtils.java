@@ -1,50 +1,131 @@
 package com.bul.satellites.service;
 
+import com.bul.satellites.algo.AlexeyAlgo;
 import com.bul.satellites.model.Interval;
+import com.google.common.collect.Streams;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class AlgoUtils {
-    static List<Interval> intervalsComplement(List<Interval> intervals, Interval limits) {
-        if (intervals.isEmpty()) {
-            return List.of(limits);
+    public static List<Interval> intervalsComplement(List<Interval> intervals, Interval limits) {
+        Stream<Instant> starts = Stream.concat(Stream.of(limits.start), intervals.stream().map(Interval::getEnd));
+        Stream<Instant> ends = Stream.concat(intervals.stream().map(Interval::getStart), Stream.of(limits.end));
+        return Streams
+                .zip(starts, ends, (start, end) -> Interval.builder().start(start).end(end).build())
+                .collect(Collectors.toList());
+    }
+
+//    private static int binarySearch(List<Interval> intervals, Instant timestamp) {
+//        int low = 0;
+//        int high = intervals.size() - 1;
+//
+//        while (low <= high) {
+//            int middleIndex = (low + high) / 2;
+//            Instant middleIndexNumber = intervals.get(middleIndex).start;
+//
+//            if (number_to_search_for == middleIndexNumber) {
+//                return middleIndex;
+//            }
+//            if (number_to_search_for < middleIndexNumber) {
+//                high = middleIndex - 1;
+//            }
+//            if (number_to_search_for > middleIndexNumber) {
+//                low = middleIndex + 1;
+//            }
+//        }
+//
+//        return -1;
+//    }
+
+    public static boolean intervalsContain(List<Interval> intervals, Interval target) {
+        return intervals.stream().anyMatch(i -> i.start.compareTo(target.start) <= 0 && i.end.compareTo(target.end) <= 0);
+    }
+
+    public static Instant latest(Instant lhs, Instant rhs) {
+        return lhs.isAfter(rhs) ? lhs : rhs;
+    }
+
+    public static Instant earliest(Instant lhs, Instant rhs) {
+        return lhs.isBefore(rhs) ? lhs : rhs;
+    }
+
+    public static Duration min(Duration a, Duration b) {
+        return a.compareTo(b) < 0 ? a : b;
+    }
+
+    public static List<Interval> intersection(List<Interval> lhs, List<Interval> rhs) {
+        int i = 0;
+        int j = 0;
+        int n = lhs.size();
+        int m = rhs.size();
+
+        List<Interval> res = new ArrayList<>(lhs.size() + rhs.size());
+        while ((i < n) && (j < m)) {
+            Interval lInterval = lhs.get(i);
+            Interval rInterval = rhs.get(j);
+
+            Instant latestStart = latest(lInterval.start, rInterval.start);
+            Instant earliestEnd = earliest(rInterval.end, rInterval.end);
+
+            if (latestStart.isBefore(earliestEnd)) {
+                Interval interval = new Interval(latestStart, earliestEnd);
+                if (interval.notEmpty()) {
+                    res.add(interval);
+                }
+            }
+
+            if (lInterval.end.isBefore(rInterval.end)) {
+                i += 1;
+            } else {
+                j += 1;
+            }
         }
-        return null; // todo
+
+        return res;
     }
 
-    static List<Interval> intersection(List<Interval> lhs, List<Interval> rhs) {
-        return null;
-    }
-
-    static Duration sumOverIntervals(List<Interval> intervals) {
+    public static Duration sumOverIntervals(List<Interval> intervals) {
         return intervals.stream().map(Interval::duration).reduce(Duration.ZERO, Duration::plus);
     }
 
-    static List<Interval> intervalsCut(List<Interval> intervals, Interval limits) {
-        // todo gotta connect w base
-        return null;
+    public static List<AlexeyAlgo.Visibility> intervalsCut(List<AlexeyAlgo.Visibility> intervals, Interval limits) {
+        List<AlexeyAlgo.Visibility> ls = new ArrayList<>();
+        intervals.forEach(n -> {
+            Instant latestStart = latest(n.interval.start, limits.start);
+            Instant earliestEnd = earliest(n.interval.end, limits.end);
+            if (latestStart.isBefore(earliestEnd)) {
+                AlexeyAlgo.Visibility visibility = new AlexeyAlgo.Visibility(new Interval(latestStart, earliestEnd), n.base);
+                ls.add(visibility);
+            }
+        });
+        return ls;
     }
 
-    static List<Interval> intervalsCutBySum(List<Interval> intervals, Duration targetSum) {
+
+    public static List<Interval> intervalsCutBySum(List<Interval> intervals, Duration targetSum) {
         Duration sum = Duration.ZERO;
         ArrayList<Interval> res = new ArrayList<>();
         for (Interval interval : intervals) {
             sum = sum.plus(interval.duration());
-            if (sum.compareTo(targetSum) <= 0) { // sum <= targetSum
+            if (sum.compareTo(targetSum) <= 0 && interval.notEmpty()) { // sum <= targetSum
                 res.add(interval);
             } else {
                 Instant rightBound = interval.end.minus(sum).plus(targetSum);
                 Interval lastInterval = Interval.builder().start(interval.start).end(rightBound).build();
-                res.add(lastInterval);
+                if (lastInterval.notEmpty())
+                    res.add(lastInterval);
             }
         }
         return res;
     }
 
-    static boolean intervalsContain(List<Interval> intervals, Instant target) {
+    public static boolean intervalsContain(List<Interval> intervals, Instant target) {
         return intervals.stream().anyMatch(e -> (e.start.compareTo(target) <= 0) && (target.compareTo(e.end) <= 0));
     }
 }
