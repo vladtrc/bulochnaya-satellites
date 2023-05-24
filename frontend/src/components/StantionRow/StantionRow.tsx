@@ -1,13 +1,14 @@
 import React, { useMemo } from "react";
 import { useMeasure } from "../../contexts/MeasureContext";
-import { tempEnd, tempMock, tempStart } from "../../temp/temp";
+import { ISatelliteResponse } from "../../interfaces";
+import { tempEnd, tempStart } from "../../temp/temp";
 import { getDaysForHeader } from "../../utils";
 import Interval from "../Interval/Interval";
 
 import styles from "./StantionRow.module.scss";
 
 interface IProps {
-  stantionData: (typeof tempMock)["results"][number];
+  stantionData: ISatelliteResponse["results"][number];
 }
 
 const StantionRow: React.FC<IProps> = ({ stantionData }) => {

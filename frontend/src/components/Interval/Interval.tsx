@@ -1,7 +1,10 @@
 import dayjs from "dayjs";
 import React from "react";
+import useSWR from "swr";
 import { DurationLabels } from "../../constants";
 import { useMeasure } from "../../contexts/MeasureContext";
+import { ISatelliteResponse } from "../../interfaces";
+import { fetcher } from "../../services/fetcher";
 import {
   getIntervalDuration,
   getIntervalOffset,
@@ -21,7 +24,16 @@ interface IProps {
 const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
   const { hourWidth, durationFormat } = useMeasure();
 
-  const startPosition = getIntervalOffset(startAt, hourWidth);
+  const { data } = useSWR<ISatelliteResponse>(
+    () => (!!true ? `/results/alex` : null),
+    fetcher
+  );
+
+  const startPosition = getIntervalOffset(
+    startAt,
+    hourWidth,
+    data?.start || ""
+  );
   const width = getIntervalWidth(startAt, endAt, hourWidth);
 
   return (
