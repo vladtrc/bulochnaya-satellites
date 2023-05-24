@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import { DurationMeasuresFormats, ScalesEnum } from "../../constants";
-import { tempEnd, tempMock, tempStart } from "../../temp/temp";
 import { getCommonWidth } from "../../utils";
 import StantionRow from "../StantionRow/StantionRow";
 import TableHeader from "../TableHeader/TableHeader";
@@ -125,14 +124,19 @@ const Table = () => {
           ))}
         </div>
         <div className={styles.content} ref={contentRef}>
-          <TableHeader />
+          <TableHeader commonEnd={aaaa.end} commonStart={aaaa.start} />
           <div
             style={{
               width: `${getCommonWidth(aaaa.start, aaaa.end, hourWidth)}px`,
             }}
           >
             {aaaa.results.map((el) => (
-              <StantionRow stantionData={el} key={el.base} />
+              <StantionRow
+                stantionData={el}
+                key={el.base}
+                commonEnd={aaaa.end}
+                commonStart={aaaa.start}
+              />
             ))}
           </div>
         </div>

@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { useMeasure } from "../../contexts/MeasureContext";
 import { ISatelliteResponse } from "../../interfaces";
-import { tempEnd, tempStart } from "../../temp/temp";
 import { getDaysForHeader } from "../../utils";
 import Interval from "../Interval/Interval";
 
@@ -9,13 +8,19 @@ import styles from "./StantionRow.module.scss";
 
 interface IProps {
   stantionData: ISatelliteResponse["results"][number];
+  commonStart: string;
+  commonEnd: string;
 }
 
-const StantionRow: React.FC<IProps> = ({ stantionData }) => {
+const StantionRow: React.FC<IProps> = ({
+  stantionData,
+  commonEnd,
+  commonStart,
+}) => {
   const { hourWidth } = useMeasure();
 
   const daysArr = useMemo(() => {
-    return getDaysForHeader(tempStart, tempEnd);
+    return getDaysForHeader(commonStart, commonEnd);
   }, []);
 
   return (
