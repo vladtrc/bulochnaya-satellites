@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
 
 @Builder
 @Getter
@@ -21,4 +22,5 @@ public class Interval {
     public boolean notEmpty() {
         return !duration().isZero();
     }
+
 }
