@@ -1,16 +1,20 @@
 import React, { useMemo } from "react";
 import { useMeasure } from "../../contexts/MeasureContext";
-import { tempEnd, tempStart } from "../../temp/temp";
 import { getDaysForHeader } from "../../utils";
 
 import styles from "./TableHeader.module.scss";
 
-const TableHeader = () => {
+interface IProps {
+  commonStart: string;
+  commonEnd: string;
+}
+
+const TableHeader: React.FC<IProps> = ({ commonEnd, commonStart }) => {
   const { hourWidth } = useMeasure();
 
   const daysArr = useMemo(() => {
-    return getDaysForHeader(tempStart, tempEnd);
-  }, []);
+    return getDaysForHeader(commonStart, commonEnd);
+  }, [commonStart, commonEnd]);
 
   return (
     <div className={styles.header}>

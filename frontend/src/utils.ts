@@ -1,4 +1,3 @@
-import { tempStart } from "./temp/temp";
 import dayjs from "dayjs";
 
 import duration from "dayjs/plugin/duration";
@@ -6,8 +5,12 @@ import { DurationMeasuresFormats } from "./constants";
 
 dayjs.extend(duration);
 
-export const getIntervalOffset = (startAt: string, hourWidth: number) => {
-  return dayjs(startAt).diff(tempStart, "hours") * hourWidth;
+export const getIntervalOffset = (
+  startAt: string,
+  hourWidth: number,
+  commonStart: string
+) => {
+  return dayjs(startAt).diff(commonStart, "hours") * hourWidth;
 };
 
 export const getIntervalWidth = (

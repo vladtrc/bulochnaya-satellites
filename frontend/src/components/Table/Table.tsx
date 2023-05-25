@@ -1,6 +1,11 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { DurationMeasuresFormats, ScalesEnum } from "../../constants";
-import { tempEnd, tempMock, tempStart } from "../../temp/temp";
 import { getCommonWidth } from "../../utils";
 import StantionRow from "../StantionRow/StantionRow";
 import TableHeader from "../TableHeader/TableHeader";
@@ -10,8 +15,10 @@ import useSWR from "swr";
 import styles from "./Table.module.scss";
 import { useMeasure } from "../../contexts/MeasureContext";
 import { fetcher } from "../../services/fetcher";
+import { ISatelliteResponse } from "../../interfaces";
 
 const scaleOptions = [
+  { value: ScalesEnum["1h"], label: "1h" },
   { value: ScalesEnum["12h"], label: "12h" },
   { value: ScalesEnum.day, label: "Day" },
   { value: ScalesEnum.week, label: "Week" },
@@ -55,14 +62,25 @@ const Table = () => {
     setAlgoName(algoInput.current?.value!);
   };
 
-  const { data } = useSWR(
+  const { data } = useSWR<ISatelliteResponse>(
     () => (!!algoName ? `/results/${algoName}` : null),
     fetcher
   );
 
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  const aaaa = useMemo<ISatelliteResponse>(() => {
+    if (!data) return { results: [], start: "", end: "" };
+    return {
+      ...data,
+      results: [data.results[0]],
+    };
+  }, [data]);
+
   return (
     <div>
-      {JSON.stringify(data)}
       <div className={styles.settings}>
         <div>
           <label className={styles.label}>Scale</label>
@@ -99,21 +117,26 @@ const Table = () => {
       <div className={styles.table}>
         <div className={styles.names}>
           <div className={styles.name}></div>
-          {tempMock.results.map((el) => (
+          {aaaa.results.map((el) => (
             <div className={styles.name} key={el.base}>
               {el.base}
             </div>
           ))}
         </div>
         <div className={styles.content} ref={contentRef}>
-          <TableHeader />
+          <TableHeader commonEnd={aaaa.end} commonStart={aaaa.start} />
           <div
             style={{
-              width: `${getCommonWidth(tempStart, tempEnd, hourWidth)}px`,
+              width: `${getCommonWidth(aaaa.start, aaaa.end, hourWidth)}px`,
             }}
           >
-            {tempMock.results.map((el) => (
-              <StantionRow stantionData={el} key={el.base} />
+            {aaaa.results.map((el) => (
+              <StantionRow
+                stantionData={el}
+                key={el.base}
+                commonEnd={aaaa.end}
+                commonStart={aaaa.start}
+              />
             ))}
           </div>
         </div>
