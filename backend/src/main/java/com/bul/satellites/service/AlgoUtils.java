@@ -7,6 +7,8 @@ import com.google.common.collect.Streams;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,6 +47,10 @@ public class AlgoUtils {
 
     public static boolean intervalsContain(List<Interval> intervals, Interval target) {
         return intervals.stream().anyMatch(i -> i.start.compareTo(target.start) <= 0 && i.end.compareTo(target.end) <= 0);
+    }
+
+    public static Duration clamp(Duration target, Duration limit) {
+        return target.compareTo(limit) > 0 ? limit : target;
     }
 
     public static Instant latest(Instant lhs, Instant rhs) {
@@ -113,7 +119,7 @@ public class AlgoUtils {
         ArrayList<Interval> res = new ArrayList<>();
         for (Interval interval : intervals) {
             sum = sum.plus(interval.duration());
-            if (sum.compareTo(targetSum) <= 0 && interval.notEmpty()) { // sum <= targetSum
+            if (sum.compareTo(targetSum) <= 0 && interval.notEmpty()) { // sum <= targetSum  todo BUG?
                 res.add(interval);
             } else {
                 Instant rightBound = interval.end.minus(sum).plus(targetSum);
@@ -123,6 +129,28 @@ public class AlgoUtils {
             }
         }
         return res;
+    }
+
+    public static List<Interval> intervalsCutBySumFromBehind(List<Interval> intervals, Duration targetSum) {
+        Duration sum = Duration.ZERO;
+        ArrayList<Interval> res = new ArrayList<>();
+        List<Interval> intervalsReversed = new ArrayList<>(intervals.stream().toList());
+        Collections.reverse(intervalsReversed);
+        for (Interval interval : intervalsReversed) {
+            sum = sum.plus(interval.duration());
+            if (sum.compareTo(targetSum) <= 0) {
+                if (interval.notEmpty()) {
+                    res.add(interval);
+                }
+            } else {
+                Instant leftBound = interval.start.plus(sum).minus(targetSum);
+                Interval lastInterval = new Interval(leftBound, interval.end);
+                if (lastInterval.notEmpty()) {
+                    res.add(lastInterval);
+                }
+            }
+        }
+        return res.stream().sorted(Comparator.comparing(i -> i.start)).collect(Collectors.toList());
     }
 
     public static boolean intervalsContain(List<Interval> intervals, Instant target) {

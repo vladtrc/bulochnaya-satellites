@@ -14,7 +14,7 @@ public class LimitValidator implements Validator {
     @Override
     public boolean validate(Result result) {
         long count = result.datasets.stream().flatMap(d -> d.entries.stream().flatMap(e -> Stream.of(e.start, e.end)))
-                .filter(i -> i.isBefore(Given.interval.start) && i.isAfter(Given.interval.end))
+                .filter(i -> i.isBefore(Given.limits.start) && i.isAfter(Given.limits.end))
                 .count();
         return count > 0;
     }
