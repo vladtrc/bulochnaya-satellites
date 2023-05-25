@@ -39,6 +39,6 @@ public class ResultToResultsWeb implements Function<Result, ResultWeb> {
                 .stream()
                 .map(this::toBaseResultWeb)
                 .collect(Collectors.toList());
-        return ResultWeb.builder().results(results).start(given.interval.start).end(given.interval.end).build();
+        return ResultWeb.builder().results(results).start(given.limits.start).end(given.limits.end).build();
     }
 }

@@ -43,16 +43,16 @@ public class AlexeyAlgo implements Algorithm {
     @Override
     public Result apply(Given given) {
         Duration step = Duration.ofSeconds(3000);
-        Instant end = given.interval.end;
-        Duration duration = given.interval.duration();
+        Instant end = given.limits.end;
+        Duration duration = given.limits.duration();
 
-        Instant t_current = given.interval.start;
+        Instant t_current = given.limits.start;
         long totalDataLost = 0;
         long totalDataReceived = 0;
 //        int output_schedule = [] .map(e -> Map.entry(e.getKey(), ))
 
-        Map<String, List<Interval>> basesFree = given.availabilityByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.interval))));
-        Map<String, List<Interval>> satellitesFree = given.availabilityBySatellite.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.interval))));
+        Map<String, List<Interval>> basesFree = given.availabilityByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.limits))));
+        Map<String, List<Interval>> satellitesFree = given.availabilityBySatellite.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.limits))));
 
 
         List<SatelliteState> satellites = given.getAvailabilityBySatellite().keySet().stream()
@@ -70,7 +70,7 @@ public class AlexeyAlgo implements Algorithm {
             results.put(satelliteBasePair, intervals);
         };
 
-        while (t_current.isBefore(given.interval.end)) {
+        while (t_current.isBefore(given.limits.end)) {
             Instant stepEnd = earliest(t_current.plus(step), end);
             for (SatelliteState s : satellites) {
                 List<Interval> russiaRanges = given.availabilityRussia.get(s.name).stream()
@@ -93,7 +93,7 @@ public class AlexeyAlgo implements Algorithm {
 
                     for (Visibility v : visibilityWithLoad) {
                         List<Interval> intervalsBusy = intersection(List.of(v.interval), satellitesFree.get(s.name));
-                        List<Interval> notIntervalsBusy = intervalsComplement(intervalsBusy, given.interval);
+                        List<Interval> notIntervalsBusy = intervalsComplement(intervalsBusy, given.limits);
                         long maxAmountOfData = given.tx_speed * sumOverIntervals(intervalsBusy).getSeconds();
 
                         if (maxAmountOfData < s.memory) {
@@ -104,7 +104,7 @@ public class AlexeyAlgo implements Algorithm {
                             s.memory -= maxAmountOfData;
                         } else {
                             intervalsBusy = intervalsCutBySum(intervalsBusy, Duration.ofSeconds(s.memory / given.tx_speed));
-                            notIntervalsBusy = intervalsComplement(intervalsBusy, given.interval);
+                            notIntervalsBusy = intervalsComplement(intervalsBusy, given.limits);
 
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
                             satellitesFree.put(s.name, intersection(satellitesFree.get(s.name), notIntervalsBusy));
@@ -128,7 +128,7 @@ public class AlexeyAlgo implements Algorithm {
                     }
                 }
             }
-            t_current = t_current.plus(min(step, Duration.between(t_current, given.interval.end)));
+            t_current = t_current.plus(min(step, Duration.between(t_current, given.limits.end)));
         }
         List<DurationDataset> durationDatasets = results.entrySet().stream()
                 .filter(d -> !d.getValue().isEmpty())
