@@ -1,6 +1,7 @@
 package com.bul.satellites;
 
 import com.bul.satellites.algo.AlexeyAlgo;
+import com.bul.satellites.algo.VladAlgo;
 import com.bul.satellites.mapper.ResultToResultsWeb;
 import com.bul.satellites.model.Given;
 import com.bul.satellites.model.Result;
@@ -27,7 +28,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Result result = new AlexeyAlgo().apply(given);
+        Result result = new VladAlgo().apply(given);
         limitValidator.validate(result);
         ResultWeb resultWeb = resultToResultsWeb.apply(result);
         ObjectMapper objectMapper = new ObjectMapper();

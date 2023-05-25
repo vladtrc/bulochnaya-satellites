@@ -1,18 +1,24 @@
 package com.bul.satellites.algo;
 
+import com.bul.satellites.mapper.IntervalDeserializer;
 import com.bul.satellites.model.Given;
 import com.bul.satellites.model.Interval;
 import com.bul.satellites.model.Result;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 import lombok.Builder;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,10 +41,8 @@ public class VladAlgo implements Algorithm {
         String base;
     }
 
-    @Override
-    public Result apply(Given given) {
 
-        Map<String, List<Interval>> rxIntervalsBySatellite = given.availabilityRussia.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().flatMap(d -> d.entries.stream()).collect(Collectors.toList())));
+    private Map<String, List<Map.Entry<Interval, List<String>>>> computeIntervalsByBases(Given given) {
         Map<String, List<Instant>> eventsByBase = given.availabilityByBase.entrySet().stream()
                 .collect(Collectors.toMap(
                                 Map.Entry::getKey,
@@ -49,7 +53,7 @@ public class VladAlgo implements Algorithm {
                                         .collect(Collectors.toList())
                         )
                 );
-        Map<String, ArrayList<Map.Entry<Interval, List<String>>>> intervalsByBases = eventsByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+        return eventsByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 e -> {
                     // get to know which intervals correspond to which satellites
                     List<Instant> borders = e.getValue();
@@ -57,7 +61,7 @@ public class VladAlgo implements Algorithm {
                     Stream<Instant> ends = Stream.concat(borders.stream(), Stream.of(limits.end));
 
                     Stream<Interval> intervals = Streams.zip(starts, ends, (start, end) -> Interval.builder().start(start).end(end).build());
-                    Function<Interval, List<String>> satelliteListByInterval = interval -> given.availabilityByBase.get(e.getKey()).stream()
+                    Function<Interval, List<String>> satelliteListByInterval = interval -> given.availabilityByBase.get(e.getKey()).parallelStream()
                             .filter(durationDataset -> intervalsContain(durationDataset.entries, interval))
                             .map(durationDataset -> durationDataset.satelliteBasePair.satellite)
                             .collect(Collectors.toList());
@@ -81,6 +85,37 @@ public class VladAlgo implements Algorithm {
                     }
                     return intervalsJoined;
                 }));
+    }
+
+    static private ObjectMapper getObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule module = new JavaTimeModule();
+        objectMapper.registerModule(module);
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addKeyDeserializer(Interval.class, new IntervalDeserializer());
+        objectMapper.registerModule(simpleModule);
+        return objectMapper;
+    }
+    private Map<String, List<Map.Entry<Interval, List<String>>>> getIntervalsFromFile() {
+        try {
+            return getObjectMapper().readValue(new File("intervalsByBases.json"), new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Result apply(Given given) {
+        Map<String, List<Interval>> rxIntervalsBySatellite = given.availabilityRussia.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().flatMap(d -> d.entries.stream()).collect(Collectors.toList())));
+//        Map<String, List<Map.Entry<Interval, List<String>>>> intervalsByBases = computeIntervalsByBases(given);
+        Map<String, List<Map.Entry<Interval, List<String>>>> intervalsByBases = getIntervalsFromFile();
+//        ObjectMapper objectMapper = getObjectMapper();
+//        try {
+//            objectMapper.writeValue(new File("intervalsByBases.json"), intervalsByBases);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         Duration maxConnectionDuration = Duration.ofSeconds(Given.memory_limit / Given.tx_speed);
 
         Map<String, List<SatelliteTaken>> result = given.availabilityByBase.keySet().stream().collect(Collectors.toMap(Function.identity(), e -> new ArrayList<>()));
@@ -104,16 +139,15 @@ public class VladAlgo implements Algorithm {
             result.put(satelliteName, intervals);
         };
 
-        for (Map.Entry<String, ArrayList<Map.Entry<Interval, List<String>>>> intervalsByBase : intervalsByBases.entrySet()) {
+        for (Map.Entry<String, List<Map.Entry<Interval, List<String>>>> intervalsByBase : intervalsByBases.entrySet()) {
             String base = intervalsByBase.getKey();
-            ArrayList<Map.Entry<Interval, List<String>>> intervals = intervalsByBase.getValue();
+            List<Map.Entry<Interval, List<String>>> intervals = intervalsByBase.getValue();
             int index = intervals.size() - 1;
             Instant rightMostPoint = intervals.get(index).getKey().end;
             while (index >= 0) {
                 Interval interval = intervals.get(index).getKey();
                 List<String> satellites = intervals.get(index).getValue();
                 index -= 1;
-
 
                 int finalI = index;
                 Function<String, Instant> satelliteConnectStart = satelliteName -> {
@@ -140,12 +174,13 @@ public class VladAlgo implements Algorithm {
                             List<Interval> requiredRxIntervals;
                             do { // уменьшаем пока не получится
                                 Instant t0 = rightMostPointCopy.minus(duration);
-                                i = duration.getSeconds() / Given.tx_speed;
+                                i = duration.getSeconds() * Given.tx_speed;
+
                                 List<Interval> rxIntervals = rxIntervalsBySatellite.get(satelliteName);
                                 rxIntervals = intersection(List.of(new Interval(limits.start, t0)), rxIntervals);
                                 Duration timeToTakePhotosToMatch = Duration.ofSeconds(i / rx_speed);
                                 requiredRxIntervals = intervalsCutBySumFromBehind(rxIntervals, timeToTakePhotosToMatch);
-                                Duration possibleRxDuration = requiredRxIntervals.stream().map(Interval::duration).reduce(Duration.ZERO, Duration::plus);
+                                Duration possibleRxDuration = sumOverIntervals(requiredRxIntervals);
                                 possibleRxDataTransferMb = possibleRxDuration.getSeconds() * rx_speed;
                                 if (i != possibleRxDataTransferMb) {
                                     duration = duration.dividedBy(2);
