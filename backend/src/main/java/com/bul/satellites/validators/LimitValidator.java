@@ -24,14 +24,14 @@ public class LimitValidator implements Validator {
     }
 
 
-    public boolean checkRussia(Result result) {
-        Map<String, List<DurationDataset>> availabilityRussia=given.getAvailabilityRussia();
-        long count = result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.satellite)).
-                forEach((k,v)->
-                        v.forEach(p -> p.entries.stream().flatMap(e -> Stream.of(e.start, e.end)).
-                            filter(i -> i.isBefore(Given.interval.start) && i.isAfter(Given.interval.end)).count();
-
-
-        return count > 0;
-    }
+//    public boolean checkRussia(Result result) {
+//        Map<String, List<DurationDataset>> availabilityRussia=given.getAvailabilityRussia();
+//        long count = result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.satellite)).
+//                forEach((k,v)->
+//                        v.forEach(p -> p.entries.stream().flatMap(e -> Stream.of(e.start, e.end)).
+//                            filter(i -> i.isBefore(Given.interval.start) && i.isAfter(Given.interval.end)).count();
+//
+//
+//        return count > 0;
+//    }
 }

@@ -31,7 +31,7 @@ class RawDataToDurationDatasetsMapperRawIT {
     @Autowired
     GivenLoader loader;
 
-    String path = "/home/badma/Загрузки/";
+    String path = "/home/badma/Загрузки/output/Aleksey_algo/";
 
     @Test
     void test() throws IOException {
@@ -43,7 +43,7 @@ class RawDataToDurationDatasetsMapperRawIT {
 
     //todo volume(sec*Gb) is null yet
     public void processResult(Result result) {
-        toConsole(result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base)));
+        toOutput(result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base)));
     }
 
 
@@ -164,6 +164,14 @@ class RawDataToDurationDatasetsMapperRawIT {
         Result result = new AlexeyAlgo().apply(loader.getGiven());
         LimitValidator lm= new LimitValidator(loader.getGiven());
         lm.validate(result);
+    }
+
+    @Test
+    void testAlekseyOutput() throws IOException {
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+        Result result = new AlexeyAlgo().apply(loader.getGiven());
+      processResult(result);
+
     }
 
 }
