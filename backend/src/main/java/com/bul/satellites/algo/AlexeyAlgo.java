@@ -3,14 +3,12 @@ package com.bul.satellites.algo;
 import com.bul.satellites.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.bul.satellites.service.AlgoUtils.*;
@@ -18,6 +16,7 @@ import static com.bul.satellites.service.AlgoUtils.*;
 public class AlexeyAlgo implements Algorithm {
 
     @Builder
+    @Getter
     static class SatelliteState {
         String name;
         long memory;
@@ -55,9 +54,9 @@ public class AlexeyAlgo implements Algorithm {
         Map<String, List<Interval>> satellitesFree = given.availabilityBySatellite.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.limits))));
 
 
-        List<SatelliteState> satellites = given.getAvailabilityBySatellite().keySet().stream()
+        List<SatelliteState> satellites = new ArrayList<>(given.getAvailabilityBySatellite().keySet().stream()
                 .map(name -> SatelliteState.builder().name(name).memory(0).intention("scan").build())
-                .toList();
+                .toList());
         Map<String, List<Visibility>> visibilities = given.getAvailabilityBySatellite().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, d -> durationDatasetToVisibility(d.getValue())));
 
@@ -72,6 +71,7 @@ public class AlexeyAlgo implements Algorithm {
 
         while (t_current.isBefore(given.limits.end)) {
             Instant stepEnd = earliest(t_current.plus(step), end);
+            satellites.sort(Comparator.comparing(SatelliteState::getMemory).reversed());
             for (SatelliteState s : satellites) {
                 List<Interval> russiaRanges = given.availabilityRussia.get(s.name).stream()
                         .flatMap(e -> e.entries.stream()).collect(Collectors.toList());
