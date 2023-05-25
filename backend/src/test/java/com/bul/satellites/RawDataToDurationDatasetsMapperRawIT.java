@@ -18,11 +18,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toMap;
 
 
 @SpringBootTest
@@ -35,15 +36,28 @@ class RawDataToDurationDatasetsMapperRawIT {
 
     @Test
     void test() throws IOException {
-       //   GivenLoader loader = new GivenLoader();
+        //   GivenLoader loader = new GivenLoader();
 
-      //  loader.getGiven().getAvailabilityRussia();
+        //  loader.getGiven().getAvailabilityRussia();
 
     }
 
     //todo volume(sec*Gb) is null yet
     public void processResult(Result result) {
-        toOutput(result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base)));
+        Map<String, List<DurationDataset>> mp = new HashMap<>();
+        result.datasets.forEach(l -> {
+                    List<Interval> ls = l.entries.stream().sorted(Comparator.comparing(Interval::getStart)).toList();
+                    String sb = l.satelliteBasePair.base;
+
+                    DurationDataset dt = DurationDataset.builder()
+                            .satelliteBasePair(l.satelliteBasePair)
+                            .entries(ls).build();
+                    List<DurationDataset> intervals = new ArrayList<>();
+                    intervals.add(dt);
+                    mp.put(sb, intervals);
+                }
+        );
+        toOutput(mp);
     }
 
 
@@ -85,38 +99,39 @@ class RawDataToDurationDatasetsMapperRawIT {
             }
         });
     }
+
     public void toOneTxt(Map<String, List<DurationDataset>> map) {
 
         InstantToString ts = new InstantToString();
-       // map.forEach((k, v) -> {
-            try {
-                //System.out.println("Satellites.txt");
-                FileWriter myWriter = new FileWriter(path+"RussiaCoverage.txt");
-                myWriter.write("Base * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
-                myWriter.write("\r\n");
-                myWriter.write("\r\n");
+        // map.forEach((k, v) -> {
+        try {
+            //System.out.println("Satellites.txt");
+            FileWriter myWriter = new FileWriter(path + "RussiaCoverage.txt");
+            myWriter.write("Base * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
+            myWriter.write("\r\n");
+            myWriter.write("\r\n");
 
-                map.forEach((k, v) -> v.forEach(p -> p.entries.forEach(t -> {
-                    try {
-                        myWriter.write(k + "  " + ts.fromInstantToString(t.start) + "  " +
-                                ts.fromInstantToString(t.end) + "  " +
-                                (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
-                                toMillisPart()) + "  " +
-                                p.satelliteBasePair.satellite + "  " + "volume");
-                        myWriter.write("\r\n");
+            map.forEach((k, v) -> v.forEach(p -> p.entries.forEach(t -> {
+                try {
+                    myWriter.write(k + "  " + ts.fromInstantToString(t.start) + "  " +
+                            ts.fromInstantToString(t.end) + "  " +
+                            (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
+                            toMillisPart()) + "  " +
+                            p.satelliteBasePair.satellite + "  " + "volume");
+                    myWriter.write("\r\n");
 
-                    } catch (IOException e) {
-                        System.out.println("An error occurred.");
-                        e.printStackTrace();
-                    }
-                })));
-                myWriter.close();
+                } catch (IOException e) {
+                    System.out.println("An error occurred.");
+                    e.printStackTrace();
+                }
+            })));
+            myWriter.close();
 
-            } catch (IOException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
         }
+    }
 
     public void toConsole(Map<String, List<DurationDataset>> map) {
 
@@ -153,7 +168,7 @@ class RawDataToDurationDatasetsMapperRawIT {
     void testBorders() throws IOException {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
-        LimitValidator lm= new LimitValidator(loader.getGiven());
+        LimitValidator lm = new LimitValidator(loader.getGiven());
         lm.validate(result);
     }
 
@@ -162,7 +177,7 @@ class RawDataToDurationDatasetsMapperRawIT {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
 
         Result result = new AlexeyAlgo().apply(loader.getGiven());
-        LimitValidator lm= new LimitValidator(loader.getGiven());
+        LimitValidator lm = new LimitValidator(loader.getGiven());
         lm.validate(result);
     }
 
@@ -170,7 +185,7 @@ class RawDataToDurationDatasetsMapperRawIT {
     void testAlekseyOutput() throws IOException {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
-      processResult(result);
+        processResult(result);
 
     }
 
