@@ -24,10 +24,7 @@ interface IProps {
 const Interval: React.FC<IProps> = ({ startAt, endAt, satelliteName }) => {
   const { hourWidth, durationFormat } = useMeasure();
 
-  const { data } = useSWR<ISatelliteResponse>(
-    () => (!!true ? `/results/alex` : null),
-    fetcher
-  );
+  const { data } = useSWR<ISatelliteResponse>(() => "alex", fetcher);
 
   const startPosition = getIntervalOffset(
     startAt,
