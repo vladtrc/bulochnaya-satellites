@@ -157,4 +157,13 @@ class RawDataToDurationDatasetsMapperRawIT {
         lm.validate(result);
     }
 
+    @Test
+    void tesRussia() throws IOException {
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+
+        Result result = new AlexeyAlgo().apply(loader.getGiven());
+        LimitValidator lm= new LimitValidator(loader.getGiven());
+        lm.validate(result);
+    }
+
 }
