@@ -23,7 +23,7 @@
 .settings {
   display: grid;
   width: 100%;
-  grid-template-columns: 5fr 5fr 2fr;
+  grid-template-columns: 5fr 5fr;
   column-gap: 24px;
   row-gap: 12px;
   padding: 16px;
@@ -38,4 +38,13 @@
 .algoField {
   display: flex;
   height: 36px;
+  width: 100%;
+}
+
+.w100p {
+  width: 100%;
+}
+
+.input {
+  flex-grow: 2;
 }

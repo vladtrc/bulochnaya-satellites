@@ -1,6 +1,7 @@
 export const HOUR_WIDTH = 30;
 
 export enum ScalesEnum {
+  "1h" = 1,
   "12h" = 12,
   day = 24,
   week = 168,
