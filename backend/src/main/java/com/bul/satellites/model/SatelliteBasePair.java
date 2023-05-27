@@ -8,4 +8,12 @@ import lombok.Builder;
 public class SatelliteBasePair {
     public String satellite;
     public String base;
+
+    @Override
+    public String toString() {
+        return "SatelliteBasePair{" +
+                "satellite='" + satellite + '\'' +
+                ", base='" + base + '\'' +
+                '}';
+    }
 }

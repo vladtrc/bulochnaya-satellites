@@ -8,7 +8,6 @@ import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.*;
 import com.bul.satellites.service.GivenLoader;
 import com.bul.satellites.validators.LimitValidator;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,13 +16,8 @@ import org.springframework.context.annotation.ComponentScan;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toMap;
 
 
 @SpringBootTest
@@ -31,6 +25,7 @@ import static java.util.stream.Collectors.toMap;
 class RawDataToDurationDatasetsMapperRawIT {
     @Autowired
     GivenLoader loader;
+    InstantToString ts = new InstantToString();
 
     String path = "/home/badma/Загрузки/output/Aleksey_algo/";
 
@@ -39,60 +34,39 @@ class RawDataToDurationDatasetsMapperRawIT {
         //   GivenLoader loader = new GivenLoader();
 
         //  loader.getGiven().getAvailabilityRussia();
-
     }
 
-    //todo volume(sec*Gb) is null yet
     public void processResult(Result result) {
-        Map<String, List<DurationDataset>> mp = new HashMap<>();
-        result.datasets.forEach(l -> {
-                    List<Interval> ls = l.entries.stream().sorted(Comparator.comparing(Interval::getStart)).toList();
-                    String sb = l.satelliteBasePair.base;
-
-                    DurationDataset dt = DurationDataset.builder()
-                            .satelliteBasePair(l.satelliteBasePair)
-                            .entries(ls).build();
-                    List<DurationDataset> intervals = new ArrayList<>();
-                    intervals.add(dt);
-                    mp.put(sb, intervals);
-                }
-        );
-        toOutput(mp);
+        Map<String, List<DurationDataset>> mp2;
+        mp2 = result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base));
+        toOutput(mp2);
     }
 
 
     public void toOutput(Map<String, List<DurationDataset>> map) {
-
-        InstantToString ts = new InstantToString();
-        map.forEach((k, v) -> {
+        toSortedOutputList(map).stream().collect(Collectors.groupingBy(Output::getBase)).forEach((k, v) -> {
+            System.out.println(k + " в входном листе: " + v.size());
             try {
-                System.out.println(path + k + ".txt");
                 FileWriter myWriter = new FileWriter(path + k + ".txt");
                 myWriter.write("Access * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
                 myWriter.write("\r\n");
                 myWriter.write("\r\n");
-
-                v.forEach(p -> p.entries.forEach(t -> {
+                v.forEach(p -> {
                     try {
-                        myWriter.write("Access" + "  " + ts.fromInstantToString(t.start) + "  " +
-                                ts.fromInstantToString(t.end) + "  " +
-                                (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
+                        myWriter.write("Access" + "  " + ts.fromInstantToString(p.getStart()) + "  " +
+                                ts.fromInstantToString(p.getEnd()) + "  " +
+                                (p.getDuration().toSeconds()) + "." + (p.getDuration().
                                 toMillisPart()) + "  " +
-                                p.satelliteBasePair.satellite + "  " + "volume");
+                                p.getSatellite() + "  " + String.format("%.2f",Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
+                                toMillisPart())) * Given.tx_speed));
                         myWriter.write("\r\n");
-                        System.out.println("Access" + "  " + ts.fromInstantToString(t.start) + "  " +
-                                ts.fromInstantToString(t.end) + "  " +
-                                (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
-                                toMillisPart()) + "  " +
-                                p.satelliteBasePair.satellite + "  " + "volume");
 
                     } catch (IOException e) {
                         System.out.println("An error occurred.");
                         e.printStackTrace();
                     }
-                }));
+                });
                 myWriter.close();
-
             } catch (IOException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
@@ -100,8 +74,28 @@ class RawDataToDurationDatasetsMapperRawIT {
         });
     }
 
-    public void toOneTxt(Map<String, List<DurationDataset>> map) {
 
+    public List<Output> toSortedOutputList(Map<String, List<DurationDataset>> map) {
+        List<Output> op = new ArrayList<>();
+        map.forEach((k, v) -> {
+                    v.forEach(p -> p.entries.forEach(t -> {
+                        Output output = new Output("Access", t.start, t.end, t.duration(), p.satelliteBasePair.base, p.satelliteBasePair.satellite, "volume");
+                        op.add(output);
+//                        System.out.println("Access" + "  " + ts.fromInstantToString(t.start) + "  " +
+//                                ts.fromInstantToString(t.end) + "  " +
+//                                (Duration.between(t.start, t.end).toSeconds()) + "." + (Duration.between(t.start, t.end).
+//                                toMillisPart()) + "  " +
+//                                p.satelliteBasePair.satellite + "  " + "volume");
+                    }));
+                }
+
+        );
+        System.out.println("op.size: " + op.size());
+        Comparator<Output> compareByBase = Comparator.comparing(Output::getBase);
+        Comparator<Output> compareByBaseAndStart = compareByBase.thenComparing(Output::getStart);
+        return op.stream().sorted(compareByBaseAndStart).toList();
+    }
+    public void toOneTxt(Map<String, List<DurationDataset>> map) {
         InstantToString ts = new InstantToString();
         // map.forEach((k, v) -> {
         try {
@@ -175,7 +169,6 @@ class RawDataToDurationDatasetsMapperRawIT {
     @Test
     void tesRussia() throws IOException {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
-
         Result result = new AlexeyAlgo().apply(loader.getGiven());
         LimitValidator lm = new LimitValidator(loader.getGiven());
         lm.validate(result);
@@ -186,7 +179,5 @@ class RawDataToDurationDatasetsMapperRawIT {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
         processResult(result);
-
     }
-
 }
