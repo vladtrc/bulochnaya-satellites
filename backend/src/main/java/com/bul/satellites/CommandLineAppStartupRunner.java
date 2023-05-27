@@ -28,7 +28,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Result result = new VladAlgo().apply(given);
+        Result result = new AlexeyAlgo().apply(given);
         limitValidator.validate(result);
         ResultWeb resultWeb = resultToResultsWeb.apply(result);
         ObjectMapper objectMapper = new ObjectMapper();
