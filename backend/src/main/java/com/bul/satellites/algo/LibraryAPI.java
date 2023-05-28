@@ -83,7 +83,6 @@ public class LibraryAPI {
 //                                p.satelliteBasePair.satellite + "  " + "volume");
                     }));
                 }
-
         );
         logger.info("Кол-во записей: " + op.size());
         Comparator<Output> compareByBase = Comparator.comparing(Output::getBase);
