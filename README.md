@@ -21,7 +21,7 @@ library.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/",
 "/home/badma/Загрузки/DATA_Files/Facility2Constellation/",
 "/home/badma/Загрузки/DATA_Files/Russia2Constellation/");
 
-
+------------------------------------------------------------------------
 
 P.S : единственный хардкод, который остался - это период наблюдения и параметры спутников.
 В классе Given - если нужно поменять горизонт планирования, нужно внести его руками:
