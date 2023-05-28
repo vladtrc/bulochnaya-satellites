@@ -98,7 +98,7 @@ public class VladAlgo implements Algorithm {
         return objectMapper;
     }
 
-    private Map<String, List<Map.Entry<Interval, List<String>>>> getIntervalsFromFile() {
+    private Map<String, List<Map.Entry<Interval, Set<String>>>> getIntervalsFromFile() {
         try {
             return getObjectMapper().readValue(new File("intervalsByBases.json"), new TypeReference<>() {
             });
@@ -111,7 +111,7 @@ public class VladAlgo implements Algorithm {
     public Result apply(Given given) {
         Map<String, List<Interval>> rxIntervalsBySatellite = given.availabilityRussia.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().flatMap(d -> d.entries.stream()).collect(Collectors.toList())));
 //        Map<String, List<Map.Entry<Interval, List<String>>>> intervalsByBases = computeIntervalsByBases(given);
-        Map<String, List<Map.Entry<Interval, List<String>>>> intervalsByBases = getIntervalsFromFile();
+        Map<String, List<Map.Entry<Interval, Set<String>>>> intervalsByBases = getIntervalsFromFile();
 //        ObjectMapper objectMapper = getObjectMapper();
 //        try {
 //            objectMapper.writeValue(new File("intervalsByBases.json"), intervalsByBases);
@@ -171,26 +171,27 @@ public class VladAlgo implements Algorithm {
             }
             return RxIntervals.builder().duration(duration).rxIntervals(requiredRxIntervals).build();
         };
-        for (Map.Entry<String, List<Map.Entry<Interval, List<String>>>> intervalsByBase : intervalsByBases.entrySet()) {
+        for (Map.Entry<String, List<Map.Entry<Interval, Set<String>>>> intervalsByBase : intervalsByBases.entrySet()) {
             String base = intervalsByBase.getKey();
-            List<Map.Entry<Interval, List<String>>> intervals = intervalsByBase.getValue();
+            List<Map.Entry<Interval, Set<String>>> intervals = intervalsByBase.getValue();
             int index = intervals.size() - 1;
             Instant rightMostPoint = intervals.get(index).getKey().end;
             while (index >= 0) {
                 Interval interval = intervals.get(index).getKey();
-                List<String> satellites = intervals.get(index).getValue();
+                Set<String> satellites = intervals.get(index).getValue();
                 index -= 1;
 
                 int finalI = index;
+                Instant finalRightMostPoint = rightMostPoint;
                 Function<String, Instant> satelliteConnectStart = satelliteName -> {
                     int j = finalI;
-                    while (intervals.get(j).getValue().contains(satelliteName)) {
+                    do {
                         j -= 1;
-                    }
-                    return intervals.get(j).getKey().start;
+                    } while (intervals.get(j).getValue().contains(satelliteName) && Duration.between(intervals.get(j).getKey().start, finalRightMostPoint).compareTo(maxConnectionDuration) <= 0);
+                    return intervals.get(j + 1).getKey().start;
                 };
                 HashMap<String, RxIntervals> rxBySatellite = new HashMap<>();
-                for (String satelliteName: satellites) {
+                for (String satelliteName : satellites) {
                     Interval connectionWindow = new Interval(satelliteConnectStart.apply(satelliteName), rightMostPoint);
                     RxIntervals rxIntervals = longestRxIntervals.apply(satelliteName, connectionWindow);
                     rxBySatellite.put(satelliteName, rxIntervals);
