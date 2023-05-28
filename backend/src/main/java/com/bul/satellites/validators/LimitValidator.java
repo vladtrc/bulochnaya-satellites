@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @Component
 @RequiredArgsConstructor
 public class LimitValidator implements Validator {
-    private final Given given;
+    //private final Given given;
     @Override
     public boolean validate(Result result) {
         long count = result.datasets.stream().flatMap(d -> d.entries.stream().flatMap(e -> Stream.of(e.start, e.end)))

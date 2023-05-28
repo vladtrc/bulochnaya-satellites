@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ResultToResultsWeb implements Function<Result, ResultWeb> {
-    final private Given given;
+    //final private Given given;
 
     List<BaseUsageResult> toBaseUsageResult(Map.Entry<String, List<DurationDataset>> pair) {
         String satellite = pair.getKey();
@@ -39,6 +39,6 @@ public class ResultToResultsWeb implements Function<Result, ResultWeb> {
                 .stream()
                 .map(this::toBaseResultWeb)
                 .collect(Collectors.toList());
-        return ResultWeb.builder().results(results).start(given.limits.start).end(given.limits.end).build();
+        return ResultWeb.builder().results(results).build();
     }
 }
