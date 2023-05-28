@@ -9,8 +9,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,14 @@ public class GivenLoader {
     private final Given given;
     private final RawDataToDurationDatasets rawDataToDurationDatasets;
 
-    public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets) throws IOException {
+  //  public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets, String facility, String borders) throws IOException {
+         public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets) throws IOException {
         this.rawDataToDurationDatasets = rawDataToDurationDatasets;
 
+//        List<DurationDataset> facilityDatasets = new ArrayList<>();
+//        List<DurationDataset> russiaDatasets = new ArrayList<>();
+
+//
         Resource[] facilityResources = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
         List<DurationDataset> facilityDatasets = Arrays.stream(facilityResources)
                 .map(GivenLoader::resourceToInputStreamReader)
@@ -37,6 +45,23 @@ public class GivenLoader {
                 .map(this::parseFromRaw)
                 .flatMap(List::stream)
                 .toList();
+
+
+//        try {
+//            InputStream inputStream = new FileInputStream(facility);
+//            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+//            //  Resource[] facilityResources2 = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
+//            facilityDatasets = parseFromRaw(inputStreamReader);
+//
+//            InputStream inputStream2 = new FileInputStream(borders);
+//            InputStreamReader inputStreamReader2 = new InputStreamReader(inputStream2);
+//            //  Resource[] facilityResources2 = new PathMatchingResourcePatternResolver().getResources("Facility2Constellation/*.txt");
+//            russiaDatasets = parseFromRaw(inputStreamReader2);
+//        } catch (IOException e) {
+//            System.out.println("An error occurred.");
+//            e.printStackTrace();
+//        }
+
 
         Map<String, List<DurationDataset>> availabilityByBase = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.base));
         Map<String, List<DurationDataset>> availabilityBySatellite = facilityDatasets.stream().collect(Collectors.groupingBy(dataset -> dataset.satelliteBasePair.satellite));

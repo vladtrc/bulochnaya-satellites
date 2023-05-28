@@ -27,7 +27,10 @@ public class LibraryAPI {
     @Autowired
     GivenLoader loader;
     InstantToString ts = new InstantToString();
-    public void algoOutput(String path) throws IOException {
+
+   // public void algoOutput(String path, String pathFacility, String pathRussia) throws IOException {
+        public void algoOutput(String path) throws IOException {
+       // GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()), pathFacility, pathRussia);
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
         processResult(result, path);
@@ -41,7 +44,7 @@ public class LibraryAPI {
 
     public void toOutput(Map<String, List<DurationDataset>> map, String path) {
         toSortedOutputList(map).stream().collect(Collectors.groupingBy(Output::getBase)).forEach((k, v) -> {
-            logger.info(k + " в входном листе: " + v.size());
+            logger.info(k + " в выходном листе: " + v.size());
             try {
                 FileWriter myWriter = new FileWriter(path + k + ".txt");
                 myWriter.write("Access * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
@@ -54,7 +57,7 @@ public class LibraryAPI {
                                 (p.getDuration().toSeconds()) + "." + (p.getDuration().
                                 toMillisPart()) + "  " +
                                 p.getSatellite() + "  " + String.format("%.2f", Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
-                                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length()-6))>111510)? Given.tx_speedC:Given.tx_speed)));
+                                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)));
                         myWriter.write("\r\n");
 
                     } catch (IOException e) {
@@ -73,7 +76,9 @@ public class LibraryAPI {
     public List<Output> toSortedOutputList(Map<String, List<DurationDataset>> map) {
         List<Output> op = new ArrayList<>();
         map.forEach((k, v) -> {
+            logger.info(k + " в входном листе: " + v.size());
                     v.forEach(p -> p.entries.forEach(t -> {
+
                         Output output = new Output("Access", t.start, t.end, t.duration(), p.satelliteBasePair.base, p.satelliteBasePair.satellite, "volume");
                         op.add(output);
 //                        logger.info("Access" + "  " + ts.fromInstantToString(t.start) + "  " +
