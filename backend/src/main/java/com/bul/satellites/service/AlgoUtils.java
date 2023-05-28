@@ -87,6 +87,7 @@ public class AlgoUtils {
                 Interval interval = new Interval(latestStart, earliestEnd);
                 if (interval.notEmpty()) {
                     res.add(interval);
+
                 }
             }
 
@@ -130,6 +131,7 @@ public class AlgoUtils {
                 Interval lastInterval = Interval.builder().start(interval.start).end(rightBound).build();
                 if (lastInterval.notEmpty())
                     res.add(lastInterval);
+                break;
             }
         }
         return res;
