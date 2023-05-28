@@ -1,12 +1,12 @@
 package com.bul.satellites;
 
 import com.bul.satellites.algo.AlexeyAlgo;
-import com.bul.satellites.algo.DumbAlgo;
 import com.bul.satellites.mapper.InstantToString;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.*;
 import com.bul.satellites.service.GivenLoader;
+
 import com.bul.satellites.validators.LimitValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ class RawDataToDurationDatasetsMapperRawIT {
                                 (p.getDuration().toSeconds()) + "." + (p.getDuration().
                                 toMillisPart()) + "  " +
                                 p.getSatellite() + "  " + String.format("%.2f", Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
-                                toMillisPart())) * Given.tx_speed));
+                                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length()-6))>111510)?Given.tx_speedC:Given.tx_speed)));
                         myWriter.write("\r\n");
 
                     } catch (IOException e) {
