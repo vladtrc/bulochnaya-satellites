@@ -2,19 +2,15 @@ package com.bul.satellites.service;
 
 import com.bul.satellites.mapper.ParserRaw;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;
-import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.DurationDataset;
 import com.bul.satellites.model.Given;
-import com.bul.satellites.model.Interval;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

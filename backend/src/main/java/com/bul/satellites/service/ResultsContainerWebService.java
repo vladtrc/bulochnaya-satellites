@@ -1,7 +1,6 @@
 package com.bul.satellites.service;
 
 import com.bul.satellites.algo.AlexeyAlgo;
-import com.bul.satellites.algo.DumbAlgo;
 import com.bul.satellites.mapper.ResultToResultsWeb;
 import com.bul.satellites.model.Given;
 import com.bul.satellites.model.ResultWeb;

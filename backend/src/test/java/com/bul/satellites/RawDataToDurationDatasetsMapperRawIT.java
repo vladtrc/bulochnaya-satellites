@@ -1,12 +1,12 @@
 package com.bul.satellites;
 
 import com.bul.satellites.algo.AlexeyAlgo;
-import com.bul.satellites.algo.DumbAlgo;
 import com.bul.satellites.mapper.InstantToString;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.*;
 import com.bul.satellites.service.GivenLoader;
+
 import com.bul.satellites.validators.LimitValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ class RawDataToDurationDatasetsMapperRawIT {
     GivenLoader loader;
     InstantToString ts = new InstantToString();
 
-    String path = "/home/badma/Загрузки/output/Aleksey_algo/";
+    // String path = "/home/badma/Загрузки/output/Aleksey_algo/";
 
     @Test
     void test() throws IOException {
@@ -36,14 +36,14 @@ class RawDataToDurationDatasetsMapperRawIT {
         //  loader.getGiven().getAvailabilityRussia();
     }
 
-    public void processResult(Result result) {
+    public void processResult(Result result, String path) {
         Map<String, List<DurationDataset>> mp2;
         mp2 = result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base));
-        toOutput(mp2);
+        toOutput(mp2, path);
     }
 
 
-    public void toOutput(Map<String, List<DurationDataset>> map) {
+    public void toOutput(Map<String, List<DurationDataset>> map, String path) {
         toSortedOutputList(map).stream().collect(Collectors.groupingBy(Output::getBase)).forEach((k, v) -> {
             System.out.println(k + " в входном листе: " + v.size());
             try {
@@ -57,8 +57,8 @@ class RawDataToDurationDatasetsMapperRawIT {
                                 ts.fromInstantToString(p.getEnd()) + "  " +
                                 (p.getDuration().toSeconds()) + "." + (p.getDuration().
                                 toMillisPart()) + "  " +
-                                p.getSatellite() + "  " + String.format("%.2f",Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
-                                toMillisPart())) * Given.tx_speed));
+                                p.getSatellite() + "  " + String.format("%.2f", Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
+                                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length()-6))>111510)?Given.tx_speedC:Given.tx_speed)));
                         myWriter.write("\r\n");
 
                     } catch (IOException e) {
@@ -73,7 +73,6 @@ class RawDataToDurationDatasetsMapperRawIT {
             }
         });
     }
-
 
     public List<Output> toSortedOutputList(Map<String, List<DurationDataset>> map) {
         List<Output> op = new ArrayList<>();
@@ -95,7 +94,8 @@ class RawDataToDurationDatasetsMapperRawIT {
         Comparator<Output> compareByBaseAndStart = compareByBase.thenComparing(Output::getStart);
         return op.stream().sorted(compareByBaseAndStart).toList();
     }
-    public void toOneTxt(Map<String, List<DurationDataset>> map) {
+
+    public void toOneTxt(Map<String, List<DurationDataset>> map, String path) {
         InstantToString ts = new InstantToString();
         // map.forEach((k, v) -> {
         try {
@@ -127,7 +127,7 @@ class RawDataToDurationDatasetsMapperRawIT {
         }
     }
 
-    public void toConsole(Map<String, List<DurationDataset>> map) {
+    public void toConsole(Map<String, List<DurationDataset>> map, String path) {
 
         InstantToString ts = new InstantToString();
         map.forEach((k, v) -> {
@@ -146,16 +146,9 @@ class RawDataToDurationDatasetsMapperRawIT {
     }
 
     @Test
-    public void testProcessResult() throws IOException {
-        Result result = Result.builder().build();
-        DumbAlgo da = new DumbAlgo();
-        processResult(result);
-    }
-
-    @Test
     void testGivenLoaderToTxt() throws IOException {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
-        toOneTxt(loader.getGiven().getAvailabilityRussia());
+        toOneTxt(loader.getGiven().getAvailabilityRussia(), "/home/badma/Загрузки/output/Aleksey_algo/");
     }
 
     @Test
@@ -178,6 +171,6 @@ class RawDataToDurationDatasetsMapperRawIT {
     void testAlekseyOutput() throws IOException {
         GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
-        processResult(result);
+        processResult(result, "/home/badma/Загрузки/output/Aleksey_algo/");
     }
 }
