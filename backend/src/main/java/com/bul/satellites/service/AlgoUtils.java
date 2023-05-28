@@ -152,6 +152,7 @@ public class AlgoUtils {
                 if (lastInterval.notEmpty()) {
                     res.add(lastInterval);
                 }
+                break;
             }
         }
         return res.stream().sorted(Comparator.comparing(i -> i.start)).collect(Collectors.toList());

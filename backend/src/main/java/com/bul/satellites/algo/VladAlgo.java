@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -96,6 +97,7 @@ public class VladAlgo implements Algorithm {
         objectMapper.registerModule(simpleModule);
         return objectMapper;
     }
+
     private Map<String, List<Map.Entry<Interval, List<String>>>> getIntervalsFromFile() {
         try {
             return getObjectMapper().readValue(new File("intervalsByBases.json"), new TypeReference<>() {
@@ -138,7 +140,37 @@ public class VladAlgo implements Algorithm {
             intervals.add(taken);
             result.put(satelliteName, intervals);
         };
+        BiFunction<String, Interval, RxIntervals> longestRxIntervals = (String satelliteName, Interval connectionWindow) -> {
+            Instant rightMostPoint = connectionWindow.end;
+            Duration possibleTxDuration = intersection(List.of(connectionWindow), satelliteFree.get(satelliteName)).stream()
+                    .filter(windowinterval -> windowinterval.end == rightMostPoint)
+                    .map(Interval::duration)
+                    .findAny()
+                    .orElse(Duration.ZERO);
+            Duration duration = clamp(possibleTxDuration, maxConnectionDuration);
+            Duration minDuration = Duration.ofSeconds(1);
+            long i;
+            long possibleRxDataTransferMb;
+            List<Interval> requiredRxIntervals;
+            do { // уменьшаем пока не получится
+                Instant t0 = rightMostPoint.minus(duration);
+                i = duration.getSeconds() * Given.tx_speed;
 
+                List<Interval> rxIntervals = rxIntervalsBySatellite.get(satelliteName);
+                rxIntervals = intersection(List.of(new Interval(limits.start, t0)), rxIntervals);
+                Duration timeToTakePhotosToMatch = Duration.ofSeconds(i).dividedBy(rx_speed);
+                requiredRxIntervals = intervalsCutBySumFromBehind(rxIntervals, timeToTakePhotosToMatch);
+                Duration possibleRxDuration = sumOverIntervals(requiredRxIntervals);
+                possibleRxDataTransferMb = possibleRxDuration.multipliedBy(rx_speed).getSeconds();
+                if (i != possibleRxDataTransferMb) {
+                    duration = duration.dividedBy(2);
+                }
+            } while (i != possibleRxDataTransferMb && (duration.compareTo(minDuration) >= 0));
+            if (duration.compareTo(minDuration) < 0) {
+                return RxIntervals.builder().duration(Duration.ZERO).rxIntervals(List.of()).build();
+            }
+            return RxIntervals.builder().duration(duration).rxIntervals(requiredRxIntervals).build();
+        };
         for (Map.Entry<String, List<Map.Entry<Interval, List<String>>>> intervalsByBase : intervalsByBases.entrySet()) {
             String base = intervalsByBase.getKey();
             List<Map.Entry<Interval, List<String>>> intervals = intervalsByBase.getValue();
@@ -157,40 +189,15 @@ public class VladAlgo implements Algorithm {
                     }
                     return intervals.get(j).getKey().start;
                 };
-                Instant rightMostPointCopy = rightMostPoint;
-                Map<String, RxIntervals> rxBySatellite = satellites.stream().collect(Collectors.toMap(Function.identity(),
-                        satelliteName -> {
-                            Interval connectionWindow = new Interval(satelliteConnectStart.apply(satelliteName), rightMostPointCopy);
-
-                            Duration possibleTxDuration = intersection(List.of(connectionWindow), satelliteFree.get(satelliteName)).stream()
-                                    .filter(windowinterval -> windowinterval.end == rightMostPointCopy)
-                                    .map(Interval::duration)
-                                    .findAny()
-                                    .orElse(Duration.ZERO);
-                            Duration duration = clamp(possibleTxDuration, maxConnectionDuration);
-                            Duration minDuration = Duration.ofSeconds(1);
-                            long i;
-                            long possibleRxDataTransferMb;
-                            List<Interval> requiredRxIntervals;
-                            do { // уменьшаем пока не получится
-                                Instant t0 = rightMostPointCopy.minus(duration);
-                                i = duration.getSeconds() * Given.tx_speed;
-
-                                List<Interval> rxIntervals = rxIntervalsBySatellite.get(satelliteName);
-                                rxIntervals = intersection(List.of(new Interval(limits.start, t0)), rxIntervals);
-                                Duration timeToTakePhotosToMatch = Duration.ofSeconds(i / rx_speed);
-                                requiredRxIntervals = intervalsCutBySumFromBehind(rxIntervals, timeToTakePhotosToMatch);
-                                Duration possibleRxDuration = sumOverIntervals(requiredRxIntervals);
-                                possibleRxDataTransferMb = possibleRxDuration.getSeconds() * rx_speed;
-                                if (i != possibleRxDataTransferMb) {
-                                    duration = duration.dividedBy(2);
-                                }
-                            } while (i != possibleRxDataTransferMb && (duration.compareTo(minDuration) >= 0));
-                            if (duration.compareTo(minDuration) < 0) {
-                                return RxIntervals.builder().duration(Duration.ZERO).rxIntervals(List.of()).build();
-                            }
-                            return RxIntervals.builder().duration(duration).rxIntervals(requiredRxIntervals).build();
-                        }));
+                HashMap<String, RxIntervals> rxBySatellite = new HashMap<>();
+                for (String satelliteName: satellites) {
+                    Interval connectionWindow = new Interval(satelliteConnectStart.apply(satelliteName), rightMostPoint);
+                    RxIntervals rxIntervals = longestRxIntervals.apply(satelliteName, connectionWindow);
+                    rxBySatellite.put(satelliteName, rxIntervals);
+                    if (rxIntervals.duration.equals(maxConnectionDuration)) {
+                        break; // no point looking for a bigger interval
+                    }
+                }
                 Map.Entry<String, RxIntervals> maxDurationEntry = Collections.max(rxBySatellite.entrySet(), Map.Entry.comparingByValue(Comparator.comparing(v -> v.duration)));
                 if (maxDurationEntry.getValue().duration.isZero()) {
                     // todo choose a point to move to
