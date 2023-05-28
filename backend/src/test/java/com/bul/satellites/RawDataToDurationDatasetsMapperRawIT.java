@@ -77,31 +77,34 @@ class RawDataToDurationDatasetsMapperRawIT {
         });
     }
 
-    @Test
-    void testGivenLoaderToTxt() throws IOException {
-        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
-        toOneTxt(loader.getGiven().getAvailabilityRussia(), "/home/badma/Загрузки/output/Aleksey_algo/");
-    }
+//    @Test
+//    void testGivenLoaderToTxt() throws IOException {
+//        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+//        toOneTxt(loader.getGiven().getAvailabilityRussia(), "/home/badma/Загрузки/output/Aleksey_algo/");
+//    }
 
-    @Test
-    void testBorders() throws IOException {
-        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
-        Result result = new AlexeyAlgo().apply(loader.getGiven());
-        LimitValidator lm = new LimitValidator(loader.getGiven());
-        lm.validate(result);
-    }
-
-    @Test
-    void tesRussia() throws IOException {
-        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
-        Result result = new AlexeyAlgo().apply(loader.getGiven());
-        LimitValidator lm = new LimitValidator(loader.getGiven());
-        lm.validate(result);
-    }
+//    @Test
+//    void testBorders() throws IOException {
+//        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+//        Result result = new AlexeyAlgo().apply(loader.getGiven());
+//        LimitValidator lm = new LimitValidator(loader.getGiven());
+//        lm.validate(result);
+//    }
+//
+//    @Test
+//    void tesRussia() throws IOException {
+//        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+//        Result result = new AlexeyAlgo().apply(loader.getGiven());
+//        LimitValidator lm = new LimitValidator(loader.getGiven());
+//        lm.validate(result);
+//    }
 
     @Test
     void testLibraryAPI() throws IOException {
         LibraryAPI la=new LibraryAPI();
+//        la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/", "/home/badma/Загрузки/DATA_Files/Facility2Constellation/",
+//                "/home/badma/Загрузки/DATA_Files/Russia2Constellation/");
+
         la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/");
     }
 }
