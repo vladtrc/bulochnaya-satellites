@@ -103,7 +103,7 @@ class RawDataToDurationDatasetsMapperRawIT {
     void testLibraryAPI() throws IOException {
         LibraryAPI la=new LibraryAPI();
        la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/", "/home/badma/Загрузки/DATA_Files/Facility2Constellation/",
-                "/home/badma/Загрузки/DATA_Files/Russia2Constellation/");
+                "/home/badma/Загрузки/DATA_Files/Russia2Constellation2/");
 
         //la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/");
     }

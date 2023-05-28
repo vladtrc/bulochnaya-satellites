@@ -82,7 +82,12 @@ public class AlexeyAlgo implements Algorithm {
 
                     long gainedData = sumOverIntervals(formerCut).toSeconds() * given.rx_speed;
 
-                    long newAmountOfData = Math.min(given.memory_limit, s.memory + gainedData);
+                //    long newAmountOfData = Math.min(given.memory_limit, s.memory + gainedData);
+
+                    long newAmountOfData = Math.min(((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? Given.memory_limit: Given.memory_limit2), s.memory + gainedData);
+
+                    //((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)
+
                     totalDataLost += s.memory + gainedData - newAmountOfData;
                     s.memory = newAmountOfData;
                 } else { // передающие спутники
@@ -94,7 +99,8 @@ public class AlexeyAlgo implements Algorithm {
                     for (Visibility v : visibilityWithLoad) {
                         List<Interval> intervalsBusy = intersection(List.of(v.interval), satellitesFree.get(s.name));
                         List<Interval> notIntervalsBusy = intervalsComplement(intervalsBusy, given.limits);
-                        long maxAmountOfData = given.tx_speed * sumOverIntervals(intervalsBusy).getSeconds();
+                        //long maxAmountOfData = given.tx_speed * sumOverIntervals(intervalsBusy).getSeconds();
+                        long maxAmountOfData =  ((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? Given.tx_speedC: Given.tx_speed)* sumOverIntervals(intervalsBusy).getSeconds();
 
                         if (maxAmountOfData < s.memory) {
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
@@ -103,7 +109,7 @@ public class AlexeyAlgo implements Algorithm {
                             totalDataReceived += maxAmountOfData;
                             s.memory -= maxAmountOfData;
                         } else {
-                            intervalsBusy = intervalsCutBySum(intervalsBusy, Duration.ofSeconds(s.memory / given.tx_speed));
+                            intervalsBusy = intervalsCutBySum(intervalsBusy, Duration.ofSeconds(s.memory / ((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? Given.tx_speedC: Given.tx_speed)));
                             notIntervalsBusy = intervalsComplement(intervalsBusy, given.limits);
 
                             basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
