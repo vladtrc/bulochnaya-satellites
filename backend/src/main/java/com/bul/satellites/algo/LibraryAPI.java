@@ -8,9 +8,9 @@ import com.bul.satellites.model.Given;
 import com.bul.satellites.model.Output;
 import com.bul.satellites.model.Result;
 import com.bul.satellites.service.GivenLoader;
+import com.google.common.collect.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
@@ -20,18 +20,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Component
 public class LibraryAPI {
     private static final Logger logger = LoggerFactory.getLogger(LibraryAPI.class);
-    @Autowired
-    GivenLoader loader;
+
     InstantToString ts = new InstantToString();
 
-   // public void algoOutput(String path, String pathFacility, String pathRussia) throws IOException {
-        public void algoOutput(String path) throws IOException {
-       // GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()), pathFacility, pathRussia);
-        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
+    public void algoOutput(String path, String pathFacility, String pathRussia) throws IOException {
+        //public void algoOutput(String path) throws IOException {
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()), pathFacility, pathRussia);
+        // GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
         processResult(result, path);
     }
@@ -50,21 +51,14 @@ public class LibraryAPI {
                 myWriter.write("Access * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
                 myWriter.write("\r\n");
                 myWriter.write("\r\n");
-                v.forEach(p -> {
-                    try {
-                        myWriter.write("Access" + "  " + ts.fromInstantToString(p.getStart()) + "  " +
-                                ts.fromInstantToString(p.getEnd()) + "  " +
-                                (p.getDuration().toSeconds()) + "." + (p.getDuration().
-                                toMillisPart()) + "  " +
-                                p.getSatellite() + "  " + String.format("%.2f", Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
-                                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)));
-                        myWriter.write("\r\n");
+                Stream<Integer> range = IntStream.range(1, v.size() + 1).boxed();
 
-                    } catch (IOException e) {
-                        logger.error("An error occurred.");
-                        e.printStackTrace();
-                    }
-                });
+                Streams.zip(v.stream(), range, (p, i) -> {
+                    extracted(myWriter, p, i);
+                    return 1;
+
+                }).collect(Collectors.toSet());
+
                 myWriter.close();
             } catch (IOException e) {
                 logger.error("An error occurred.");
@@ -73,10 +67,26 @@ public class LibraryAPI {
         });
     }
 
+    private void extracted(FileWriter myWriter, Output p, int i) {
+        try {
+            myWriter.write(i + "  " + ts.fromInstantToString(p.getStart()) + "  " +
+                    ts.fromInstantToString(p.getEnd()) + "  " +
+                    (p.getDuration().toSeconds()) + "." + (p.getDuration().
+                    toMillisPart()) + "  " +
+                    p.getSatellite() + "  " + String.format("%.2f", Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
+                    toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)));
+            myWriter.write("\r\n");
+
+        } catch (IOException e) {
+            logger.error("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
     public List<Output> toSortedOutputList(Map<String, List<DurationDataset>> map) {
         List<Output> op = new ArrayList<>();
         map.forEach((k, v) -> {
-            logger.info(k + " в входном листе: " + v.size());
+                    logger.info(k + " в входном листе: " + v.size());
                     v.forEach(p -> p.entries.forEach(t -> {
 
                         Output output = new Output("Access", t.start, t.end, t.duration(), p.satelliteBasePair.base, p.satelliteBasePair.satellite, "volume");

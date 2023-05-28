@@ -21,17 +21,17 @@ public class ResultsContainerWebService {
 
     Map<String, Future<ResultWeb>> results = new HashMap<>();
     ExecutorService executorService;
-    Given given;
+    //Given given;
 
-    public ResultsContainerWebService(GivenLoader givenLoader, ResultToResultsWeb resultToResultsWeb) {
-        this.given = givenLoader.getGiven();
-        this.executorService = Executors.newFixedThreadPool(3);
-
-        Stream.of(
-                new AlexeyAlgo()
-        ).forEach(algo -> results.put(
-                algo.name(),
-                executorService.submit(() -> resultToResultsWeb.apply(algo.apply(given))))
-        );
-    }
+//    public ResultsContainerWebService(GivenLoader givenLoader, ResultToResultsWeb resultToResultsWeb) {
+//        this.given = givenLoader.getGiven();
+//        this.executorService = Executors.newFixedThreadPool(3);
+//
+//        Stream.of(
+//                new AlexeyAlgo()
+//        ).forEach(algo -> results.put(
+//                algo.name(),
+//                executorService.submit(() -> resultToResultsWeb.apply(algo.apply(given))))
+//        );
+//    }
 }

@@ -23,8 +23,8 @@ import java.util.*;
 @SpringBootTest
 @ComponentScan("com.bul.satellites.mapper")
 class RawDataToDurationDatasetsMapperRawIT {
-    @Autowired
-    GivenLoader loader;
+   // @Autowired
+  //  GivenLoader loader;
     InstantToString ts = new InstantToString();
 
     public void toOneTxt(Map<String, List<DurationDataset>> map, String path) {
@@ -102,9 +102,9 @@ class RawDataToDurationDatasetsMapperRawIT {
     @Test
     void testLibraryAPI() throws IOException {
         LibraryAPI la=new LibraryAPI();
-//        la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/", "/home/badma/Загрузки/DATA_Files/Facility2Constellation/",
-//                "/home/badma/Загрузки/DATA_Files/Russia2Constellation/");
+       la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/", "/home/badma/Загрузки/DATA_Files/Facility2Constellation/",
+                "/home/badma/Загрузки/DATA_Files/Russia2Constellation/");
 
-        la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/");
+        //la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/");
     }
 }
