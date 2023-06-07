@@ -26,7 +26,8 @@ import java.util.stream.Stream;
 @Component
 public class LibraryAPI {
     private static final Logger logger = LoggerFactory.getLogger(LibraryAPI.class);
-
+    double totalVolume = 0;
+    int totalVolumeByTime = 0;
     InstantToString ts = new InstantToString();
 
     public void algoOutput(String path, String pathFacility, String pathRussia) throws IOException {
@@ -59,15 +60,19 @@ public class LibraryAPI {
 
                 }).collect(Collectors.toSet());
 
+
                 myWriter.close();
             } catch (IOException e) {
                 logger.error("An error occurred.");
                 e.printStackTrace();
             }
         });
+        logger.info("total volume: "+ String.format("%.2f", Double.valueOf(totalVolume)));
     }
 
     private void extracted(FileWriter myWriter, Output p, int i) {
+        totalVolume = totalVolume + Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
+                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed);
         try {
             myWriter.write(i + "  " + ts.fromInstantToString(p.getStart()) + "  " +
                     ts.fromInstantToString(p.getEnd()) + "  " +
