@@ -26,7 +26,8 @@ import java.util.stream.Stream;
 @Component
 public class LibraryAPI {
     private static final Logger logger = LoggerFactory.getLogger(LibraryAPI.class);
-
+    double totalVolume = 0;
+    int totalVolumeByTime = 0;
     InstantToString ts = new InstantToString();
 
     public void algoOutput(String path, String pathFacility, String pathRussia) throws IOException {
@@ -37,10 +38,37 @@ public class LibraryAPI {
         processResult(result, path);
     }
 
-    public void processResult(Result result, String path) {
+    public void processResult(Result result, String path) throws IOException {
         Map<String, List<DurationDataset>> mp2;
         mp2 = result.datasets.stream().collect(Collectors.groupingBy(e -> e.satelliteBasePair.base));
         toOutput(mp2, path);
+    }
+
+    public void toOutputOneList(Map<String, List<DurationDataset>> map, String path) throws IOException {
+        FileWriter myWriter = new FileWriter(path + "Overall" + ".txt");
+        myWriter.write("Access * BaseName * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
+        myWriter.write("\r\n");
+        myWriter.write("\r\n");
+        toSortedOutputList(map).stream().collect(Collectors.groupingBy(Output::getBase)).forEach((k, v) -> {
+            logger.info(k + " в выходном листе: " + v.size());
+
+
+            Stream<Integer> range = IntStream.range(1, v.size() + 1).boxed();
+
+            Streams.zip(v.stream(), range, (p, i) -> {
+                extracted(myWriter, p, i);
+                return 1;
+
+            }).collect(Collectors.toSet());
+        });
+
+            try {
+                myWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            logger.info("total volume: " + String.format("%.2f", Double.valueOf(totalVolume)));
+
     }
 
     public void toOutput(Map<String, List<DurationDataset>> map, String path) {
@@ -68,13 +96,15 @@ public class LibraryAPI {
     }
 
     private void extracted(FileWriter myWriter, Output p, int i) {
+        totalVolume = totalVolume + Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
+                toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)*0.125;
         try {
-            myWriter.write(i + "  " + ts.fromInstantToString(p.getStart()) + "  " +
+            myWriter.write(i + "  "  + p.getBase() + "  " + ts.fromInstantToString(p.getStart()) + "  " +
                     ts.fromInstantToString(p.getEnd()) + "  " +
                     (p.getDuration().toSeconds()) + "." + (p.getDuration().
                     toMillisPart()) + "  " +
                     p.getSatellite() + "  " + String.format("%.2f", Double.valueOf((p.getDuration().toSeconds()) + "." + (p.getDuration().
-                    toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)));
+                    toMillisPart())) * ((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)*0.125));
             myWriter.write("\r\n");
 
         } catch (IOException e) {
