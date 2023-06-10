@@ -7,7 +7,7 @@ import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.mapper.StringToInstant;
 import com.bul.satellites.model.*;
 import com.bul.satellites.service.GivenLoader;
-import com.bul.satellites.validators.LimitValidator;
+//import com.bul.satellites.validators.LimitValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 
@@ -101,9 +102,19 @@ class RawDataToDurationDatasetsMapperRawIT {
 
     @Test
     void testLibraryAPI() throws IOException {
+        Interval limits = new Interval(Instant.parse("2027-06-01T00:00:00Z"), Instant.parse("2027-06-14T00:00:00Z"));
+        Params pr= Params.builder()
+                .memory_limit(8000000)
+                .memory_limit2(4000000)
+                .rx_speed(4000)
+                .tx_speedC(1000)
+                .tx_speed(250)
+                .limits(limits)
+                .build();
+        ;
         LibraryAPI la=new LibraryAPI();
        la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/", "/home/badma/Загрузки/DATA_Files/Facility2Constellation/",
-                "/home/badma/Загрузки/DATA_Files/Russia2Constellation2/");
+                "/home/badma/Загрузки/DATA_Files/Russia2Constellation2/", pr);
 
         //la.algoOutput("/home/badma/Загрузки/output/Aleksey_algo/");
     }

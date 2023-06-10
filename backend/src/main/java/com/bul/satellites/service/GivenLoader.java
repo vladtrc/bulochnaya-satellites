@@ -4,6 +4,7 @@ import com.bul.satellites.mapper.ParserRaw;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.model.DurationDataset;
 import com.bul.satellites.model.Given;
+import com.bul.satellites.model.Params;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -21,7 +22,7 @@ public class GivenLoader {
     private final Given given;
     private final RawDataToDurationDatasets rawDataToDurationDatasets;
 
-    public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets, String facility, String borders) throws IOException {
+    public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets, String facility, String borders, Params params) throws IOException {
         //  public GivenLoader(RawDataToDurationDatasets rawDataToDurationDatasets) throws IOException {
         this.rawDataToDurationDatasets = rawDataToDurationDatasets;
 
@@ -88,6 +89,7 @@ public class GivenLoader {
                 .availabilityByBase(availabilityByBase)
                 .availabilityBySatellite(availabilityBySatellite)
                 .availabilityRussia(availabilityRussia)
+                .params(params)
                 .build();
     }
 

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/*
 @Component
 @RequiredArgsConstructor
 public class LimitValidator implements Validator {
@@ -22,6 +23,7 @@ public class LimitValidator implements Validator {
                 .count();
         return count > 0;
     }
+*/
 
 
 //    public boolean checkRussia(Result result) {
@@ -34,4 +36,4 @@ public class LimitValidator implements Validator {
 //
 //        return count > 0;
 //    }
-}
+//}

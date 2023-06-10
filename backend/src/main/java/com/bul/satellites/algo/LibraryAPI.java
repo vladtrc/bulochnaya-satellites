@@ -3,10 +3,7 @@ package com.bul.satellites.algo;
 import com.bul.satellites.mapper.InstantToString;
 import com.bul.satellites.mapper.RawDataToDurationDatasets;
 import com.bul.satellites.mapper.StringToInstant;
-import com.bul.satellites.model.DurationDataset;
-import com.bul.satellites.model.Given;
-import com.bul.satellites.model.Output;
-import com.bul.satellites.model.Result;
+import com.bul.satellites.model.*;
 import com.bul.satellites.service.GivenLoader;
 import com.google.common.collect.Streams;
 import org.slf4j.Logger;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -30,9 +28,17 @@ public class LibraryAPI {
     int totalVolumeByTime = 0;
     InstantToString ts = new InstantToString();
 
-    public void algoOutput(String path, String pathFacility, String pathRussia) throws IOException {
+    public void algoOutput(String path, String pathFacility, String pathRussia, Params pr) throws IOException {
         //public void algoOutput(String path) throws IOException {
-        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()), pathFacility, pathRussia);
+
+
+        //    public static long tx_speedC = 1000;  // Мегабит/сек отправка на Землю //125 мегабайт
+//    public static long tx_speed = 250;  // Мегабит/сек отправка на Землю//31,25 мегабайт
+//    public static long rx_speed = 4000;  // Мегабит/сек фотографирование//500 мегабайт
+//    public static long memory_limit = 8000000;  // Мегабит (1 Терабайт)
+//    public static long memory_limit2 = 4000000;
+
+        GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()), pathFacility, pathRussia, pr);
         // GivenLoader loader = new GivenLoader(new RawDataToDurationDatasets(new StringToInstant()));
         Result result = new AlexeyAlgo().apply(loader.getGiven());
         processResult(result, path);
