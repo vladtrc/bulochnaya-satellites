@@ -44,7 +44,7 @@ public class LibraryAPI {
         toOutput(mp2, path);
     }
 
-    public void toOutputOneList(Map<String, List<DurationDataset>> map, String path) throws IOException {
+    public void toOutput(Map<String, List<DurationDataset>> map, String path) throws IOException {
         FileWriter myWriter = new FileWriter(path + "Overall" + ".txt");
         myWriter.write("Access * BaseName * Start Time (UTCG) * Stop Time (UTCG) * Duration (sec) * Satname * Data (Mbytes)");
         myWriter.write("\r\n");
@@ -71,7 +71,7 @@ public class LibraryAPI {
 
     }
 
-    public void toOutput(Map<String, List<DurationDataset>> map, String path) {
+    public void toOutput2(Map<String, List<DurationDataset>> map, String path) {
         toSortedOutputList(map).stream().collect(Collectors.groupingBy(Output::getBase)).forEach((k, v) -> {
             logger.info(k + " в выходном листе: " + v.size());
             try {
