@@ -21,6 +21,19 @@ public class AlexeyAlgo implements Algorithm {
         String name;
         long memory;
         String intention; // "scan"/"transmit"
+
+
+        public long txSpeed(Params params) {
+            return isKino() ? params.tx_speedC : params.tx_speed;
+        }
+
+        public long memoryLimit(Params params) {
+            return isKino() ? params.memory_limit : params.memory_limit2;
+        }
+
+        public boolean isKino() {
+            return Integer.parseInt(name.substring(name.length() - 6)) > 111510;
+        }
     }
 
 
@@ -42,21 +55,12 @@ public class AlexeyAlgo implements Algorithm {
     @Override
     public Result apply(Given given) {
         Duration step = Duration.ofSeconds(3000);
-//        Instant end = given.limits.end;
-//
-//        Duration duration = given.limits.duration();
-//
-//        Instant t_current = given.limits.start;
 
         Instant end = given.params.limits.end;
 
-        Duration duration = given.params.limits.duration();
-
         Instant t_current = given.params.limits.start;
 
-        long totalDataLost = 0;
         long totalDataReceived = 0;
-//        int output_schedule = [] .map(e -> Map.entry(e.getKey(), ))
 
         Map<String, List<Interval>> basesFree = given.availabilityByBase.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.params.limits))));
         Map<String, List<Interval>> satellitesFree = given.availabilityBySatellite.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, (e) -> new ArrayList<>(List.of(given.params.limits))));
@@ -79,12 +83,8 @@ public class AlexeyAlgo implements Algorithm {
 
         while (t_current.isBefore(given.params.limits.end)) {
             Instant stepEnd = earliest(t_current.plus(step), end);
-
-            //   Collections.shuffle(satellites);
-
+            satellites.stream().filter(s -> s.memory < given.params.memory_limit);
             for (SatelliteState s : satellites) {
-
-
                 List<Interval> russiaRanges = given.availabilityRussia.get(s.name).stream()
                         .flatMap(e -> e.entries.stream()).collect(Collectors.toList());
 
@@ -95,12 +95,10 @@ public class AlexeyAlgo implements Algorithm {
 
 
                 if (maxGainedData != 0) {
-                    long newAmountOfData = Math.min(((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? given.params.memory_limit : given.params.memory_limit2), s.memory + maxGainedData);
+                    long newAmountOfData = Math.min(s.memoryLimit(given.params), s.memory + maxGainedData);
                     long accum = sumOverIntervals(formerCut).toSeconds() * (newAmountOfData - s.memory) / maxGainedData;
                     List<Interval> fullLoadIntervals = intervalsCutBySum(formerCutFree, Duration.ofSeconds(accum));
                     try {
-
-                        //   System.out.println(s.name + " " + sumOverIntervals(formerCut).toSeconds() * newAmountOfData / gainedData);
                         System.out.println("Длительность без переполнения " + s.name + " " + sumOverIntervals(formerCut).toSeconds() * (newAmountOfData - s.memory) / maxGainedData);
                     } catch (ArithmeticException ae) {
                         System.out.println("ArithmeticException occured!");
@@ -116,31 +114,9 @@ public class AlexeyAlgo implements Algorithm {
             for (SatelliteState s : satellites) {
 
                 List<Interval> russiaRanges = given.availabilityRussia.get(s.name).stream()
-                        .flatMap(e -> e.entries.stream()).collect(Collectors.toList());
+                        .flatMap(e -> e.entries.stream()).toList();
 
                 Interval stepInterval = new Interval(t_current, stepEnd);
-//                if (s.intention.equals("scan")) {
-//                    List<Interval> formerCut = intersection(russiaRanges, List.of(stepInterval));
-/////sumOverIntervals(formerCut).toSeconds() *newAmount/gaindata
-//                    long gainedData = sumOverIntervals(formerCut).toSeconds() * given.params.rx_speed;
-//
-//                    //    long newAmountOfData = Math.min(given.memory_limit, s.memory + gainedData);
-//
-//                    long newAmountOfData = Math.min(((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? given.params.memory_limit : given.params.memory_limit2), s.memory + gainedData);
-//
-//                    //((Integer.parseInt(p.getSatellite().substring(p.getSatellite().length() - 6)) > 111510) ? Given.tx_speedC : Given.tx_speed)
-//                    if (gainedData > 0) {
-//                        try {
-//
-//                            //   System.out.println(s.name + " " + sumOverIntervals(formerCut).toSeconds() * newAmountOfData / gainedData);
-//                            System.out.println("Длительность без переполнения " + s.name + " " + sumOverIntervals(formerCut).toSeconds() * (newAmountOfData - s.memory) / gainedData);
-//                        } catch (ArithmeticException ae) {
-//                            System.out.println("ArithmeticException occured!");
-//                        }
-//                    }
-//                    totalDataLost += s.memory + gainedData - newAmountOfData;
-//                    s.memory = newAmountOfData;
-//                } else { // передающие спутники
                 List<Visibility> cutVisibilities = intervalsCut(visibilities.get(s.name), stepInterval);
                 List<Visibility> visibilityWithLoad = cutVisibilities.stream()
                         .flatMap(v -> intersection(List.of(v.interval), basesFree.get(v.base)).stream().map(i -> new Visibility(i, v.base)))
@@ -150,8 +126,7 @@ public class AlexeyAlgo implements Algorithm {
                 for (Visibility v : visibilityWithLoad) {
                     List<Interval> intervalsBusy = intersection(List.of(v.interval), satellitesFree.get(s.name));
                     List<Interval> notIntervalsBusy = intervalsComplement(intervalsBusy, given.params.limits);
-                    //long maxAmountOfData = given.tx_speed * sumOverIntervals(intervalsBusy).getSeconds();
-                    long maxAmountOfData = ((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? given.params.tx_speedC : given.params.tx_speed) * sumOverIntervals(intervalsBusy).getSeconds();
+                    long maxAmountOfData = (s.txSpeed(given.params)) * sumOverIntervals(intervalsBusy).getSeconds();
 
                     if (maxAmountOfData < s.memory) {
                         basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
@@ -160,7 +135,7 @@ public class AlexeyAlgo implements Algorithm {
                         totalDataReceived += maxAmountOfData;
                         s.memory -= maxAmountOfData;
                     } else {
-                        intervalsBusy = intervalsCutBySum(intervalsBusy, Duration.ofSeconds(s.memory / ((Integer.parseInt(s.getName().substring(s.getName().length() - 6)) > 111510) ? given.params.tx_speedC : given.params.tx_speed)));
+                        intervalsBusy = intervalsCutBySum(intervalsBusy, Duration.ofSeconds(s.memory / s.txSpeed(given.params)));
                         notIntervalsBusy = intervalsComplement(intervalsBusy, given.params.limits);
 
                         basesFree.put(v.base, intersection(basesFree.get(v.base), notIntervalsBusy));
